@@ -1,0 +1,42 @@
+div.sidenav{
+	background: #E0E0E0;
+	margin-top: 25px;
+	float: left;
+	width: 150px;
+	height: 82vh;
+}
+
+li.sidenav_li {
+	list-style: none;
+	text-align: center;
+	display: block;
+	background: #E0E0E0; 
+}
+
+a {
+	color: #000;
+}
+
+li.sidenav_li a:link {
+	padding: 10px 5px;
+	color: #FFF; /*being overridden by the global a style*/
+	display: block;
+	text-decoration: none;
+	background: -webkit-linear-gradient(left top, #E0E0E0,  #BDBDBD); 
+	background: -o-linear-gradient(bottom right, #E0E0E0, #BDBDBD); 
+	background: -moz-linear-gradient(bottom right, #E0E0E0, #BDBDBD); 
+	background: linear-gradient(to bottom right, #E0E0E0, #BDBDBD);
+}
+
+	
+li.sidenav_li a:hover {
+	display: block;
+	color: #FFF;
+	background: -webkit-linear-gradient(left top, #BDBDBD, #E0E0E0); 
+	background: -o-linear-gradient(bottom right, #BDBDBD, #E0E0E0); 
+	background: -moz-linear-gradient(bottom right, #BDBDBD, #E0E0E0); 
+	background: linear-gradient(to bottom right, #BDBDBD, #E0E0E0);
+}
+	
+li.sidenav_li a:active {
+}

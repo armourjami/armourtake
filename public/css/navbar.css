@@ -1,0 +1,84 @@
+nav{
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+	margin-top: 90px;
+	height: 35px;
+	background: #9E9D24;
+	z-index: 100;
+}
+
+/*Note the settings for aligning the ul to the right
+Also note that line-height is the solution for veritically aligning the text, images can be veritically aligned using vertical-align:, but text cannot
+*/
+nav ul {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+	display: table;
+	float: right;
+	/*Need to middle align text and order the li*/
+}
+
+nav ul li.navbar {
+	padding: 0 5px;
+	line-height: 35px;
+	background: #9E9D24;
+	display: table-cell;
+	float: left;
+	font-family: 'Orbitron', sans-serif;
+	font-size: .7em;
+	left: 0;
+	width: 100px;
+}
+
+li.navbar:hover {
+	background: #827717;
+}
+
+p {
+	font-style: verdana;
+	margin-left: 15px;
+}
+
+ul.drop-down {
+	position: relative;
+	width: 100px;
+	margin-right: 0;
+	margin-top: 0;
+	padding: 0;
+	display: none;
+}
+
+#user-dropdown li{
+	padding-left: 0;
+}
+
+li.drop-down {
+	width: inherit;
+	font-family: 'Orbitron', sans-serif;
+	list-style-type: none;
+	background-color: #9E9D24; 
+	cursor: pointer;
+}
+
+li.drop-down:hover {
+	background: #827717;
+}
+
+li#user-drop {
+	
+}
+
+.page-name {
+	float: left;
+	padding: 11px;
+	margin-left: 30px;
+	color: #F0F4C3;
+	font-family: 'Orbitron', sans-serif;
+}
+
+

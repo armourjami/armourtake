@@ -1,0 +1,4 @@
+#.htmlconfig file
+#This file is used to add settings to a particular Html class instance
+INLINE_TAGS th, p, td, li, b, span
+ERRORS on 

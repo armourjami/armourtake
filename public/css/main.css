@@ -1,0 +1,96 @@
+/*******Main div and banner/logo styles**************/
+
+body {
+	background: #EEE;
+}
+
+div.main {
+	margin-top: 25px;
+	padding: 30px;
+}
+
+div.main-div {
+	float: left;
+	
+}
+
+div.banner {
+	background: #333;
+	margin: 0;
+	width: 100%;
+	height: 100px;
+	background: #111; /* For browsers that do not support gradients */
+	background: -webkit-linear-gradient(left top, #111, #333); /* For Safari 5.1 to 6.0 */
+	background: -o-linear-gradient(bottom right, #111, #333); /* For Opera 11.1 to 12.0 */
+	background: -moz-linear-gradient(bottom right, #111, #333); /* For Firefox 3.6 to 15 */
+	background: linear-gradient(to bottom right, #111, #333); /* Standard syntax */
+}
+
+.logo {
+	color: #777;
+	position: absolute;
+	top: 50px;
+	left: 100px;	
+	font-family: 'Orbitron', sans-serif;
+	font-size: 2em;
+	
+}
+
+svg {
+	margin: 0;
+}
+
+p {
+	font-family: arial;
+}
+
+li {
+	font-family: verdana;
+	list-style: none;
+}
+
+/*********Recipe display styles**************/
+
+div.recipe {
+	display: block;
+	width: 800px;
+	padding: 5px;
+	margin-left: 30px;
+}
+
+div.recipe h1{
+	font-size: 2em;
+}
+
+div.recipe p{
+	margin-top: 10px;
+}
+
+div.recipe p.goback {
+	margin-top: 40px;
+}
+
+span.recipe_heading {
+	font-weight: bold;
+}
+
+p.recipe_method {
+	margin-left: 10px;
+}
+
+textarea.method {
+	resize: none;
+}
+
+label.recipe_label {
+	display: inline;
+}
+
+input[type="submit"].recipe_delete {
+	float: left;	
+	background: red;
+}
+
+input[type="submit"].recipe_buttons {
+	float: right;	
+}
