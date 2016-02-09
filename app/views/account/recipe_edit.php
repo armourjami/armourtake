@@ -1,132 +1,96 @@
-<?php
-/*PARAMS: 	name - username
-		flash - session flash data
-		recipe_name
-		yeild
-		yeild_unit
-		method
-		cost
-*/
-include_once '../app/includes/header.php';
-?>
-<div class="main-div">
-<?php
-	if(isset($data['flash'])){
-		echo '<p>' . $data['flash'] . '</p>';
-	}	
-	$unit = $data['recipe']['yeildUnit'];
-	if($data['recipe']['yeildUnit'] == 'Each'){
-		$unit = 'portion/servings';
-	}
-		
-?>
-	<div class="recipe">
-		<form method="post" action="/account/update_recipe/">	
+<div class="main-div" ng-app="armourtake">
+	<p><?=$data['flash']?></p>
+	<!--Load the recipe table data-->
+	<script type="text/javascript">
+		var json = '<?=$data['recipe']?>';
+		var recipe = JSON.parse(json);
+
+		json = '<?=$data['units']?>';
+		var units = JSON.parse(json);
+	
+		json = '<?=$data['ingredients']?>';
+		var ingredients = JSON.parse(json);
+
+		json = '<?=$data['products']?>';
+		var products = JSON.parse(json); 
+	</script>
+	<!--FOR DEBUGGING: <?=var_dump($data['recipe'])?>-->
+	<!--FOR DEBUGGING: <?=var_dump($data['units'])?>-->
+	<!--FOR DEBUGGING: <?=var_dump($data['ingredients'])?>-->
+
+	<div class="recipe" ng-controller="recipeEditController as recipeCtrl" ng-init="recipe_id = recipeCtrl.recipe.id">
+		<form method="post" action="/armourtake/public/account/update_recipe/?recipe_id=1">	
 			<h1>Recipe</h1>
 				<br>
-				<input type="hidden" id="recipe_id" name="recipe_id" value="<?php echo $data['recipe']['id']; ?>">
+				<input class="hidden" type="text" id="recipe_id" name="recipe_id" ng-model="recipeCtrl.recipe.id" />
 				<label class="recipe_label">
-				Recipe title:
-				<input type="text" id="recipe_name" name="recipe_name" value="<?php echo $data['recipe']['recipeName'];?>" />
+				Recipe name:
+			<!--Name-->
+				<input type="text" id="recipe_name" name="recipe_name" ng-model="recipeCtrl.recipe.recipeName" />
 				</label>
 				<br><br>
 				<label class="recipe_label">
 				Yeild: 
-				<input type="text" id="recipe_yeild" name="recipe_yeild" value="<?php echo $data['recipe']['yeild'];?>" />
+			<!--Yeild for recipe-->
+				<input type="text" id="recipe_yeild" name="recipe_yeild" ng-model="recipeCtrl.recipe.yeild" />%
 				</label>
 				<label class="recipe_label">
 				Unit: 
-				<select id="recipe_unit" name="recipe_unit">
-				<?php
-				$selected = '';
-				foreach($data['units'] as $unit):
-					if($unit['Name'] == $data['recipe']['yeildUnit']){$selected = ' selected';}
-				?>
-				<option value="<?=$unit['Name']?>"<?=$selected?>><?=$unit['Name'];?></option>
-				<?php 
-				$selected = '';
-				endforeach;
-				 ?>
+			<!--Units dropdown-->
+				<select id="recipe_unit" name="recipe_unit" ng-model="recipeCtrl.recipe.yeildUnit">
+					<option ng-repeat="unit in recipeCtrl.units">{{unit.Name}}</option>
 				</select>
 				</label>
-
 				<label class="recipe_label">
-				Cost: 
-				$<input type="text" readOnly="true" id="recipeCost" name="recipeCost" value="<?=number_format($data['recipe']['recipeCost'], 2)?>"\>
-				<input type="hidden" id="recipe_cost" name="recipe_cost" value="<?=$total?>">
+				Total cost: 
+			<!--Cost of recipe-->
+				$<input type="text" readOnly="true" id="recipe_cost" name="recipe_cost" ng-model="getTotalCost()"\>
+				<!--<input type="hidden" id="recipe_cost" name="recipe_cost" ng-model="recipeCtrl.recipeCost">-->
 				</label>
 				<label class="recipe_label">
-				<?php 
-				$ratio = 0;
-				for($i = 0; $i<count($data['units']); $i++){
-					if($data['units'][$i]['Name'] == $data['recipe']['yeildUnit']){
-						$ratio = $data['units'][$i]['Ratio'];
-					}
-				}	
-				?>
-				Cost per <?=$data['recipe']['yeildUnit'];?>: $<?=number_format(($data['recipe']['recipeCost'] / $data['recipe']['yeild'])*$ratio, 2);?> 
-				<label class="recipe_label">
-				<br><br>
-
-<!--Ingredients list begins here-->
-			<?php 
-			$item_number = 1;
-			foreach($data['ingredients'] as $ingredient):
-			?>
-<!--Item <?=$item_number?> Product id <?=$ingredient['Products_id']?>-->
-				<input type="text" id="quantity<?=$ingredient['Products_id']?>" name="quantity<?=$ingredient['Products_id']?>" value="<?=$ingredient['quantity']?>" />
-				
-				<!--Units dropdown-->
-				<select id="unit<?=$ingredient['Products_id']?>" name="unit<?=$ingredient['Products_id']?>">
-				<?php 
-				$current_unit = '';
-				foreach($data['units'] as $unit): 
-					$selected = '';
-					if($unit['Name'] == $ingredient['Unit_Name']){
-						$current_unit = $unit['Ratio'];
-						$selected = ' selected';
-					} ?>
-						<option value="<?=$unit['Name']?>"<?=$selected?>><?=$unit['Name']?></option>
-					<?php unset($selected); 
-				endforeach;
-				?>
-				</select>
-				<?php $selected = '';?>
-
-				<!--Product name drop down -->
-				<input type="text" readOnly=true id="name<?=$ingredient['Products_id']?>" name="name<?=$ingredient['Products_id']?>" value="<?=$ingredient['productName']?>">
-
-				$ <input type="text" readOnly="true" id="ingredient_cost<?=$item_number?>" name="ingredient_cost<?=$item_number?>" value="<?=number_format($ingredient['costPerKiloUnit']*$current_unit,2)?>">
-				Total: $
-				<input type="text" id="cost<?=$ingredient['Products_id']?>" name="cost<?=$ingredient['Products_id']?>" readOnly="true" value="<?=number_format($ingredient['costPerKiloUnit'] * $ingredient['quantity']*$current_unit,2)?>" />
-				<button id="delete<?=$item_number?>" name="delete<?=$item_number?>">Delete</button>
+				Cost per {{recipeCtrl.recipe.yeildUnit}}: 
+			<!--Cost of recipe-->
+				$<input type="text" readOnly="true" id="recipe_individual_cost" name="recipe_individul_cost" ng-model="getTotalCost()/recipeCtrl.recipe.yeild | currency"\>
+				</label>
 
 				<br>
+			<!--Ingredients list-->
+				<section ng-repeat="ingredient in recipeCtrl.ingredients">
+				<!--product_id-->
+					<input class="hidden" type="text" id="product_id{{$index}}" name="product_id{{$index}}" ng-model="ingredient.Products_id">	
+				<!--quantity-->
+					<input type="text" id="quantity" name="quantity{{$index}}" ng-model="ingredient.quantity">			
+				<!--Unit dropdown-->
+					<select id="unit" name="unit{{$index}}" ng-model="ingredient.unit">
+						<option ng-repeat="unit in recipeCtrl.units" ng-selected="unit.id == ">{{unit.Name}}</option>
+					</select>
+				<!--Product name-->
+					<input type="text" disabled="" ng-model="ingredient.productName">
+				<!--Cost calculated for each unit selected-->
+					$<input type="text" disabled=""  ng-model="ingredient.cost = ingredient.costPerKiloUnit * ingredient.Ratio">
+				<!--Total cost for quantity*cost of unit selected-->
+					Total $<input type="text" readOnly="true" id="total_cost{{$index}}" name="total_cost{{$index}}" ng-model="totalcost = ingredient.cost * ingredient.quantity">
+				</section>
 				<br>
-			<?php 
-			$item_number++;
-			endforeach;
-			 ?>				
-<!--Ingredients list ends here-->
-
 				<br>
-				<br>
-<!--Method-->
+			<!--Method-->
 				Method:<br>
-				<textarea class="method" rows=10 cols=100 id="recipe_method" name="recipe_method"><?php echo $data['recipe']['method'];?></textarea>
+				<textarea class="method" rows=10 cols=100 id="recipe_method" name="recipe_method">{{recipeCtrl.recipe.method}}</textarea>
 				</label>
-<!--Buttons-->
+			<!--Buttons-->
 				<input type=submit value="Update" class="recipe_buttons">
-				<!--Cancel the action-->
+			<!--Cancel the action-->
 				<input type=submit value="cancel" class="recipe_buttons">
-				<!--Delete the entry-->
+			<!--Delete the entry-->
 				<input type=submit value="Delete" class="recipe_delete">
 		</form>
 		<p class="goback">
 			<a href="<?php echo dirname($_SERVER['PHP_SELF']) . '/account/recipes'; ?>">Back to Recipes</a>
 		</p>
+
 		<!--This is just me playing around with APIS-->
 		<?php
+			/*
 			$maps_url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' . urlencode('disneyland, CA'); 
 			$maps_json = file_get_contents($maps_url);
 			$maps_array = json_decode($maps_json, true);
@@ -140,8 +104,6 @@ include_once '../app/includes/header.php';
 			echo '<img src="' . $image_url . '"\>';
 			echo var_dump($image_url);
 			//code=294189837.c3e5a6d.536a8d5f9cf94a0482fb6a69df944df3
+			*/
 		?>
 	</div>	
-<?php
-	
-?>

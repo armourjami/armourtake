@@ -1,33 +1,30 @@
-<?php
-/*PARAMS: 	name - username
-		flash - session flash data
-		
-*/
-include_once '../app/includes/header.php';
-//include_once $_SERVER['DOCUMENT_ROOT'] . '/login/mvc/app/includes/sidenav.php';
-?>
-<div class="main-div">
-<?php
-	if(isset($data['flash'])){
-		echo '<p>' . $data['flash'] . '</p>';
-	}	
-?>
-<?php
-/**********************
-	Build the table
-***********************/
-	$doc = new DOMDoc();
-	$doc->preserveWhiteSpace = false;
-	$table = new Table(3,3, $doc);
-	$doc->loadHTMLFile('../app/boiler_plate.html');
-	$doc->formatOutput = true;
-	$table = new recipes_table($doc, $data['user_id']);
-	$body = $doc->getElementsByTagName('body')->item(0);
-	$body->appendChild($table->getTableElement());
-	$doc->formatOutput = true;
-	echo $doc->saveXML();
-/*****************************
-	End building the table
-******************************/
-
-?>
+<div class="main-div" ng-app="armourtake">
+	<?php
+		if(isset($data['flash'])){
+			echo '<p>' . $data['flash'] . '</p>';
+		}	
+	?>
+	<!--Load the recipe table data-->
+	<script type="text/javascript">
+		var json = '<?=$data['recipes']?>';
+		var recipes = JSON.parse(json);
+	</script>
+	<!--FOR DEBUGGING: <?=var_dump($data['recipes'])?>-->
+	<!--Display the recipe data-->
+	<table id="recipe_table" name="recipe_table">
+		<thead>
+			<th>Recipe Name</th>
+			<th>Cost</th>
+			<th>&nbsp;</th>
+			<th>&nbsp;</th>
+		</thead>
+		<tbody ng-controller="recipeTableController as recipeCtrl">
+			<tr ng-repeat="recipe in recipeCtrl.recipes">
+				<td>{{recipe.recipeName}}</td>
+				<td>{{recipe.recipeCost | currency}}</td>
+				<td><a href="/armourtake/public/account/recipe/{{recipe.id}}">View</a></td>
+				<td><a href="/armourtake/public/account/edit_recipe/{{recipe.id}}">Edit/Delete</a></td>
+			</tr>
+		</tbody>
+	</table>
+</div>

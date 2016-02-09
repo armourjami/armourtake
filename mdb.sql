@@ -144,7 +144,11 @@ CREATE TABLE IF NOT EXISTS `mdb`.`Unit` (
 -- -----------------------------------------------------
 INSERT INTO `Unit`(`user`, `Name`, `Ratio`, `UnitType`) VALUES 
 ( 1, '2L Bottle', 2.0, 'Litre'),
-( 1, 'Cup', 0.25, 'Litre');
+( 1, 'Loaf', 1, 'Each'),
+( 1, 'Cup', 0.25, 'Litre'),
+( 1, 'Litre', 1, 'Litre'),
+( 1, 'Kilo', 1, 'Kilo'),
+( 1, 'Portion', 1.0, 'Each');
 
 -- -----------------------------------------------------
 -- Table `mdb`.`Products`
@@ -176,6 +180,7 @@ CREATE TABLE IF NOT EXISTS `mdb`.`Products` (
 -- -----------------------------------------------------
 
 INSERT INTO `Products`(`user`, `productName`, `purchaseUnit`, `purchaseUnitPrice`, `purchaseUnitWeight`, `yeild`, `costPerKiloUnit`, `Suppliers_id`, `UnitName`) VALUES
+(1, 'Bread', 'Loaf', 2.00, 1.00, 100, 2.00, 1, 'Loaf'),
 (1, 'Milk', '2L Bottle', 3.95, 2.00, 100, 2.00, 1, 'Litre'); 
 
 -- -----------------------------------------------------
@@ -210,14 +215,23 @@ DROP TABLE IF EXISTS `mdb`.`Recipes` ;
 CREATE TABLE IF NOT EXISTS `mdb`.`Recipes` (
   `user` INT(11) NOT NULL,
   `id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `yeild` DECIMAL(3,2) NOT NULL DEFAULT 1.00,
+  `yeild` DECIMAL(5,2) NOT NULL DEFAULT 1.00,
+  `yeildUnit` VARCHAR(20) NOT NULL,
   `method` MEDIUMTEXT NULL,
   `recipeName` VARCHAR(45) NULL,
   `recipeCost` DECIMAL(13,2) NOT NULL,
   CONSTRAINT fk_Recipes_users FOREIGN KEY (`user`)
-  REFERENCES users(`id`)
+  REFERENCES users(`id`),
+  CONSTRAINT fk_Recipes_Unit FOREIGN KEY(`yeildUnit`)
+  REFERENCES Unit(`Name`)
 );
 
+-- -----------------------------------------------------
+-- Insert default entry
+-- -----------------------------------------------------
+
+INSERT INTO `Recipes` (`user`, `yeild`, `yeildUnit`, `method`, `recipeName`, `recipeCost`) VALUES
+( 1, 12, 'Portion', 'Put and egg on it', 'Eggy Cupcakes', 5);
 
 -- -----------------------------------------------------
 -- Table `mdb`.`ProductRecipes`
@@ -229,7 +243,7 @@ CREATE TABLE IF NOT EXISTS `mdb`.`ProductRecipes` (
   `Products_id` INT(11) NOT NULL,
   `Recipes_id` INT(11) NOT NULL,
   `quantity` DECIMAL(10,2) NOT NULL DEFAULT 1.00,
-  `unit` VARCHAR(45) NULL,
+  `unit` VARCHAR(45) NULL COMMENT 'Portion, Litre etc',
   CONSTRAINT fk_ProductRecipes_users FOREIGN KEY (`user`)
   REFERENCES users(`id`),
   CONSTRAINT fk_ProductRecipes_Products FOREIGN KEY (`Products_id`)
@@ -238,10 +252,71 @@ CREATE TABLE IF NOT EXISTS `mdb`.`ProductRecipes` (
   REFERENCES Recipes(`id`)
 );
 
+-- -----------------------------------------------------
+-- Insert default Product/Recipes
+-- -----------------------------------------------------
+
+INSERT INTO `ProductRecipes`( `user`, `Products_id`, `Recipes_id`, `quantity`, `unit`) VALUES
+( 1, 1, 1, 3, 'Loaf'),
+( 1, 2, 1, 12, 'Litre');
 
 -- -----------------------------------------------------
--- Table `mdb`.`Dishes`
+-- Table `mdb`.`Dietary`
 -- -----------------------------------------------------
+
+DROP TABLE IF EXISTS `mdb`.`Dietary` ;
+
+CREATE TABLE IF NOT EXISTS `mdb`.`Dietary` (
+  `user` INT(11) NOT NULL,
+  `id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(20) NOT NULL UNIQUE,
+  `description` TEXT NOT NULL,
+  CONSTRAINT fk_Dietary_users FOREIGN KEY (`user`)
+  REFERENCES users(`id`)
+);
+
+-- -----------------------------------------------------
+-- Insert default values
+-- -----------------------------------------------------
+
+INSERT INTO `Dietary` ( `user`, `name`, `description`) VALUES
+( 1, 'None', 'No dietary requirememnts'),
+( 1, 'Vegan', 'No animal products'),
+( 1, 'Vegetarian', 'No meat'),
+( 1, 'Gluten free', 'No Flour or products conducts containing gluten'),
+( 1, 'Dairy free', 'No Dairy products'),
+( 1, 'No Seafood', ''),
+( 1, 'Nut free', 'Does not contain nuts');
+
+-- -----------------------------------------------------
+-- Table `mdb`.`DishDietary`
+-- -----------------------------------------------------
+
+DROP TABLE IF EXISTS `mdb`.`DishDietary` ;
+
+CREATE TABLE IF NOT EXISTS `mdb`.`DishDietary` (
+  `user` INT(11) NOT NULL,
+  `Dietary_id` INT(11) NOT NULL,
+  `Dishes_id` INT(11) NOT NULL,
+  CONSTRAINT fk_DishDietary_Dietary FOREIGN KEY (`Dietary_id`)
+  REFERENCES Dietary(`id`),
+  CONSTRAINT fk_DishDietary_Dishes FOREIGN KEY (`Dishes_id`)
+  REFERENCES Dishes(`id`),
+  CONSTRAINT fk_DishDietary_users FOREIGN KEY (`user`)
+  REFERENCES users(`id`)
+);
+
+-- -----------------------------------------------------
+-- Insert default values
+-- -----------------------------------------------------
+
+INSERT INTO `DishDietary` ( `user`, `Dietary_id`, `Dishes_id`) VALUES 
+( 1, 1, 1);
+
+-- -----------------------------------------------------
+-- table `mdb`.`dishes`
+-- -----------------------------------------------------
+
 DROP TABLE IF EXISTS `mdb`.`Dishes` ;
 
 CREATE TABLE IF NOT EXISTS `mdb`.`Dishes` (
@@ -250,14 +325,19 @@ CREATE TABLE IF NOT EXISTS `mdb`.`Dishes` (
   `dishName` VARCHAR(45) NULL,
   `dishPrice` DECIMAL(13,2) NOT NULL COMMENT 'including GST\n',
   `costPrice` DECIMAL(13,2) NOT NULL COMMENT 'cost price of food ex get\n',
-  `margin` DECIMAL(4,2) NOT NULL,
+  `margin` DECIMAL(4,2) NOT NULL COMMENT 'as a percentage',
   `yeild` INT(3) NOT NULL COMMENT 'number of dishes\n',
-  `type` VARCHAR(10) NOT NULL DEFAULT 'none'  COMMENT 'vegan, ego, gluten free, dairy free, seafood, meat, none\n',
   `grossRevenue` DECIMAL(13,2) NOT NULL,
   CONSTRAINT fk_Dishes_users FOREIGN KEY (`user`)
   REFERENCES users(`id`)
 );
 
+-- -----------------------------------------------------
+-- Insert default Dishes
+-- -----------------------------------------------------
+
+INSERT INTO `Dishes` (`user`, `dishName`, `dishPrice`, `costPrice`, `margin`, `yeild`, `grossRevenue`) VALUES
+( 1, 'Cupcakes with tomato sauce', 6, 2, 65, 12, 4); 
 
 -- -----------------------------------------------------
 -- Table `mdb`.`DishProducts`
@@ -280,6 +360,7 @@ CREATE TABLE IF NOT EXISTS `mdb`.`DishProducts` (
 -- -----------------------------------------------------
 -- Table `mdb`.`DishRecipe`
 -- -----------------------------------------------------
+
 DROP TABLE IF EXISTS `mdb`.`DishRecipes` ;
 
 CREATE TABLE IF NOT EXISTS `mdb`.`DishRecipes` (
@@ -294,6 +375,12 @@ CREATE TABLE IF NOT EXISTS `mdb`.`DishRecipes` (
   REFERENCES Recipes(`id`)
 );
 
+-- -----------------------------------------------------
+-- Insert default values
+-- -----------------------------------------------------
+
+INSERT INTO `DishRecipes`( `user`, `Dishes_id`, `Recipes_id`) VALUES
+( 1, 1, 1);
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

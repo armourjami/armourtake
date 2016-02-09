@@ -12,6 +12,7 @@
 	<script type=text/javascript src="/armourtake/public/scripts/jquery-2.1.3.js"></script>
 	<script type=text/javascript src="/armourtake/public/scripts/main.js"></script>
 	<script type=text/javascript src="/armourtake/public/scripts/modal.js"></script>
+	<script type=text/javascript src="/armourtake/public/scripts/angular.min.js"></script>
 	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
 	<meta charset="utf-8">
 </head>

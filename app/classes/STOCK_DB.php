@@ -94,37 +94,67 @@ class STOCK_DB {
 
 	public function join($tables = array()){
 		$user = new User();
-		$table1 = $tables[0]['name'];
-		$join_table = $tables[1]['name'];
-		$table2 = $tables[2]['name'];
-
+	//Set table rules, ANDs etc
 		$table_rules = array();
 		$final_values = array();
-		array_push($final_values, $user->data()->id);
-
+	//Build table rule strings**********************
 		$x = 0;
 		foreach($tables as $table){
 			$table_rules[$x] = '';
 			foreach($table as $key => $value){
-				if($key !== 'name'){
-					$table_rules[$x] .= "AND `{$key}` = ?";	
+				if($key !== 'table_name' && $key !== 'next_table_name' && $key !== 'table_column' && $key !== 'next_table_column' && $key !== 'selections'){
+					$table_rules[$x] .= " AND ";
+					$table_rules[$x] .= "`{$key}` = ?";	
 					array_push($final_values, $value);
 				}
 			}
 			$x++;
 		}
+		array_push($final_values, $user->data()->id);
+	//Build field SELECT strings*********************
+		$table_selections = array();	
 
-		$sql = "SELECT {$table1}.*, {$table2}.*, {$join_table}.* 
-			FROM {$table1} 
-			JOIN {$join_table} 
-			ON {$table1}.`id`={$join_table}.`{$table1}_id` 
-			AND {$table1}.`user` = ?
-			{$table_rules[0]}
-			JOIN {$table2} 
-			ON {$join_table}.`{$table2}_id` = {$table2}.`id` 
-			{$table_rules[1]}
-			{$table_rules[2]}";
-	
+		for($i = 0; $i < count($tables); $i++){	
+			//Keep the table name separate for building the select string
+			$table_name = $tables[$i]['table_name'];
+			$table_selections[$i] = '';
+			if(!empty($tables[$i]['selections']) && $tables[$i]['selections'][0] == '*'){
+				$table_selections .= "`{$table_name}`.*";
+				//Add commer if neccesary
+				if(($i + 1) < count($tables[$i])){
+						$table_selections[$i] .= ", ";
+				}//else end of selections
+			}else{
+				for($j = 0; $j < count($tables[$i]['selections']); $j++){
+					//Create each selection `Products`.`id` for example
+					$table_selections[$i] .= "`{$table_name}`.`{$tables[$i]['selections'][$j]}`";
+					//Add commer if neccesary
+					if(/*($j + 1) < count($tables[$i]['selections']) &&*/ !empty($tables[$i]['selections'][$j])){
+						$table_selections[$i] .= ", ";
+					}//else end of selections
+				}
+			}
+		}
+	//Build the final query**************************
+		$sql = "SELECT ";
+		//What fields we are selecting
+		for($j = 0; $j < count($table_selections); $j++){
+			$sql .= $table_selections[$j];
+		}
+		$sql = substr($sql, 0, strlen($sql) - 2);//Removes the last ', ' from the selections
+
+		//Join up the tables
+		for($i = 0; $i < (count($tables) - 1); $i++){
+			if($tables[$i]['next_table_name'] !== null && $tables[$i]['next_table_column'] !== null){	
+				if($i == 0){
+				$sql .= "FROM `{$tables[$i]['table_name']}` ";
+				}
+				$sql .= "JOIN `{$tables[$i]['next_table_name']}`  
+					ON `{$tables[$i]['table_name']}`.`{$tables[$i]['table_column']}` = `{$tables[$i]['next_table_name']}`.`{$tables[$i]['next_table_column']}`"; 
+			}
+			$sql .= "{$table_rules[$i]} "; 
+		}
+		$sql .= "AND `{$tables[0]['table_name']}`.`user` = ?;";
 		if(!$this->query($sql, $final_values)->error()){
 			return $this;
 		}
@@ -182,9 +212,11 @@ class STOCK_DB {
 			return true;
 		}
 		return false;
+		
 	}
 
 	public function update_recipe($products_id, $recipes_id, $field, $user_id){
+		echo "recipe id " . $recipes_id;
 		$set = '';
 		$x = 1;
 		//add the user to the field array so it is generated in the sql statement
@@ -196,6 +228,8 @@ class STOCK_DB {
 			$x++;
 		}
 		$sql = "UPDATE `ProductRecipes`  SET {$set} WHERE Recipes_id = {$recipes_id} AND Products_id = {$products_id} AND user = {$user_id};";
+
+		echo $sql;
 		if(!$this->query($sql, $field)->error()){
 			return true;
 		}

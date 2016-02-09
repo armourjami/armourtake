@@ -31,7 +31,15 @@ class account extends Controller{
 		$user = new User();
 		if($user->isLoggedIn()){
 			//The products table will be rendered on the view page	
+			$db = STOCK_DB::getInstance();						
+
+			//load database content
+			$products = $db->get('Products', ['id', '>=', '1'], $user->data()->id);
+			$product_count = $products->count();
+			$json_products = json_encode($products->results());	
+
 			$this->view('account/products', [
+				'products' => $json_products,
 				'register' => true, 
 				'loggedIn' => 1, 
 				'flash' => $flash_string, 
@@ -74,8 +82,16 @@ class account extends Controller{
 		}
 		$user = new User();
 		if($user->isLoggedIn()){
-			//The products table will be rendered on the view page	
+			//The recipes table will be rendered on the view page	
+			$db = STOCK_DB::getInstance();						
+
+			//load database content
+			$recipes = $db->get('Recipes', ['id', '>=', '1'], $user->data()->id);
+			$recipe_count = $recipes->count();
+			$json_recipes = json_encode($recipes->results());	
+
 			$this->view('account/recipes', [
+				'recipes' => $json_recipes,
 				'register' => true, 
 				'loggedIn' => 1, 
 				'flash' => $flash_string, 
@@ -101,18 +117,14 @@ class account extends Controller{
 				
 				$recipe = $this->_db->get('Recipes', ['id', '=', $idRecipe], $user->data()->id);
 				$recipe = $recipe->first();
-				$json  = json_encode($recipe);
-				$recipe = json_decode($json, true);
+				$recipe_json  = json_encode($recipe);
 					
 				$units = $this->_db->get('Unit', ['Name', '<>', ''], $user->data()->id);
-				$units = $units->results();	
-				$json  = json_encode($units);
-				$units = json_decode($json, true);
+				$units_json  = json_encode($units->results());
 
-				$pros_recs = new recipe($recipe['id']);
+				$pros_recs = new recipe($idRecipe);
 				$pro_rec = $pros_recs->data();	
-				$json  = json_encode($pro_rec);
-				$ingredients = json_decode($json, true);
+				$ingredients_json  = json_encode($pro_rec);
 
 				$this->view('account/recipe_view', [
 					'register' => true, 
@@ -121,9 +133,9 @@ class account extends Controller{
 					'name' => $user->data()->name, 
 					'page_name' => "",
 					'user_id' => $user->data()->id,
-					'units' => $units,
-					'recipe' => $recipe,
-					'ingredients' => $ingredients,
+					'units' => $units_json,
+					'recipe' => $recipe_json,
+					'ingredients' => $ingredients_json,
 				]);
 
 			}else{		
@@ -154,32 +166,30 @@ class account extends Controller{
 				
 				$recipe = $this->_db->get('Recipes', ['id', '=', $idRecipe], $user->data()->id);
 				$recipe = $recipe->first();
-				$json  = json_encode($recipe);
-				$recipe = json_decode($json, true);
-
-				$pros_recs = new recipe($recipe['id']);
-				$pro_rec = $pros_recs->data();	
-				$json  = json_encode($pro_rec);
-				$ingredients = json_decode($json, true);
-				
+				$recipe_json  = json_encode($recipe);
+					
 				$units = $this->_db->get('Unit', ['Name', '<>', ''], $user->data()->id);
-				$units = $units->results();	
-				$json  = json_encode($units);
-				$units = json_decode($json, true);
+				$units_json  = json_encode($units->results());
+
+				$pros_recs = new recipe($idRecipe);
+				$pro_rec = $pros_recs->data();	
+				$ingredients_json  = json_encode($pro_rec);
 
 				$products = new products(); 
+				$products_json = json_encode($products->getColumn('productName'));
+
 				
 				$this->view('account/recipe_edit', [
 					'register' => true, 
 					'loggedIn' => 1, 
 					'flash' => $flash_string, 
 					'name' => $user->data()->name, 
-					'page_name' => "Edit " . $recipe['recipeName'],
-					'ingredients' => $ingredients,
-					'products' => $products->getColumn('productName'),
-					'user_id' => $user->data()->id,
-					'recipe' => $recipe,
-					'units' => $units,
+					'page_name' => "Edit recipe",
+					'ingredients' => $ingredients_json,
+					'products' => $products_json,
+ 					'user_id' => $user->data()->id,
+					'recipe' => $recipe_json,
+					'units' => $units_json,
 				]);
 
 			}else{		
@@ -209,7 +219,6 @@ class account extends Controller{
 				$this->_db = STOCK_DB::getInstance();						
 				$recipe = $this->_db->get('Recipes', ['id', '=', Input::get('recipe_id')], $user->data()->id);
 				$recipe = $recipe->first();
-
 				
 				$pros_recs = new recipe(Input::get('recipe_id'));
 				$pro_rec = $pros_recs->data();	
@@ -249,58 +258,60 @@ class account extends Controller{
 					}
 					if(Input::get('recipe_unit') !== $recipe->yeildUnit){
 						$entry_changes['yeildUnit'] = Input::get('recipe_unit');
+					}
+					if(floatval(Input::get('recipe_cost')) !== floatval($recipe->recipeCost)){
+						$entry_changes['recipeCost'] = Input::get('recipe_cost');
 					}	
 					//$entry_changes['recipeCost'];
 					if(Input::get('recipe_method') !== $recipe->method){
 						$entry_changes['method'] = filter_var(trim(Input::get('recipe_method')),FILTER_SANITIZE_SPECIAL_CHARS);
 					}
-
-					
 					//Update each feild
 					if(count($entry_changes)){
 						$pros_recs->update($entry_changes);
 					}
 				}
 				$error_string = "";
-
-				//Validate and check all ProductRecipe data
-				$recipe_cost = 0;
+				echo var_dump($_POST);
+				$i = 0;
 				foreach($ingredients as $value){
-					$i = $value['Products_id'];	
-					$error_string .= 'id' . $i . " current cost" . $value['quantity']*$value['costPerKiloUnit'] . " input cost" . Input::get("cost$i") . "<br>";
-					if(Input::get("quantity$i") !== $value['quantity'] || 
-					   Input::get("unit$i") !== $value['Unit_Name'] ||
-					   Input::get("cost$i") !== $value['quantity']*$value['costPerKiloUnit']){
-						$validate = new Validation();
-						$validation = $validate->check($_POST, array(
-							"quantity$i" => array(
-								'required' => true,
-								'min' => 0,
-								'max' => 1000
-							),
-							"unit$i" => array(
-								'required' => true
-							)
-						));
-						if($validation->passed()){
-							$changes = array(
-								"quantity" => Input::get("quantity$i"),
-								"Unit_Name" => Input::get("unit$i")
-							);			
-							//find the ratio from the unit name then multiply is by the costPerKiloUnit
-							$unit = $this->_db->get('Unit', ['Name', '=', Input::get("unit$i")], $user->data()->id);
-							$unit = $unit->first();
-							
-							$recipe_cost += (Input::get("quantity$i")*$unit->Ratio)*$value['costPerKiloUnit'];
+					echo Input::get("product_id$i");
+					//echo Input::get("quantity$i");
+					//echo Input::get("cost$i");
+					//echo Input::get("total_cost$i");
 
-							//Update the Ingredient	
-							$pros_recs->updateIngredient($value['Products_id'], $value['Recipes_id'], $changes);
-						}	
+					if(Input::get("product_id$i") != ""){
+						if(Input::get("quantity$i") != $value['quantity'] || Input::get("unit$i") != $value['unit']){
+							//Validate changes	
+							$validate = new Validation();
+							$validation = $validate->check($_POST, array(
+								"quantity$i" => array(
+									'required' => true,
+									'min' => 0,
+									'max' => 1000
+								),
+								"unit$i" => array(
+									'required' => true
+								)
+							));
+							//Update the changes
+							if($validation->passed()){
+								$changes = array(
+									"quantity" => Input::get("quantity$i"),
+									"unit" => Input::get("unit$i")
+								);			
+								
+								//Update the Ingredient	
+								$pros_recs->updateIngredient($value['Products_id'], $changes);
+							}
+						}
+					}else{
+						continue;
 					}
-				}//End foreach	
-
-				//Update the recipe Cost		
-				$pros_recs->update(['recipeCost' => $recipe_cost]);
+					$i++;
+				}
+				
+				$pros_recs->update(['recipeCost' => Input::get('recipe_cost')]);
 
 				foreach($validation->errors() as $error){
 					$error_string .= $error . "\n";

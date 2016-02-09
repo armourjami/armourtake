@@ -94,3 +94,7 @@ input[type="submit"].recipe_delete {
 input[type="submit"].recipe_buttons {
 	float: right;	
 }
+
+input.hidden {
+	display: none;
+}
