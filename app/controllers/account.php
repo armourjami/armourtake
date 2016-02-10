@@ -105,6 +105,36 @@ class account extends Controller{
 		}
 	}
 
+	public function delete_recipe(){
+		$flash_string = '';
+		if(Session::exists('account')){
+			$flash_string = Session::flash('account');	
+		}
+		$user = new User();
+		if($user->isLoggedIn()){
+			//The recipes table will be rendered on the view page	
+								
+			$this->_db = STOCK_DB::getInstance();
+			
+			$dishes = $this->_db->get('Dishes', ['id', '>=', Input::get('recipe_id')]);
+			$dish_count = $dishes->count();
+			if(!$dish_count){
+				$this->_db->delete('ProductRecipes', ['Recipes_id', '=', Input::get('recipe_id')]);
+				$this->_db->delete('Recipes', ['id', '=', Input::get('recipe_id')]);
+				
+				Session::flash('account', 'Recipe deleted');
+			}else{
+
+				Session::flash('account', 'Recipe could not be deleted as it is still part of a dish');
+			}
+			
+			Redirect::to('account/recipes');
+		}else{
+			Session::flash('home', 'You have been logged out, please log back in');
+			Redirect::to('home');
+		}
+	}
+
 	public function recipe($idRecipe = null){
 		$flash_string = '';
 		if(Session::exists('account')){
@@ -275,10 +305,6 @@ class account extends Controller{
 				echo var_dump($_POST);
 				$i = 0;
 				foreach($ingredients as $value){
-					echo Input::get("product_id$i");
-					//echo Input::get("quantity$i");
-					//echo Input::get("cost$i");
-					//echo Input::get("total_cost$i");
 
 					if(Input::get("product_id$i") != ""){
 						if(Input::get("quantity$i") != $value['quantity'] || Input::get("unit$i") != $value['unit']){

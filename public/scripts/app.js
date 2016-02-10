@@ -21,6 +21,7 @@
 		this.units = units;
 		this.ingredients = ingredients;
 		this.products = products;
+
 		$scope.getTotalCost = function(){
 			var total = 0;
 			for(var i = 0; i < $scope.recipeCtrl.ingredients.length; i++){
@@ -29,6 +30,11 @@
 			return total;
 		};
 
+		$scope.decodeHtml = function(html) {
+			    var txt = document.createElement("textarea");
+			    txt.innerHTML = html;
+			    return txt.value;
+		};
 	});
 
 

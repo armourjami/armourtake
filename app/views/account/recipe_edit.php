@@ -1,4 +1,24 @@
 <div class="main-div" ng-app="armourtake">
+<div id="modal">
+	<div id="modalMask">
+	</div>
+	<div id="modalContent">
+		<form class="edit-form">
+			<fieldset>
+							<label> <span>Name</span>
+								<input type="text" name="name" id="name"/>
+							</label>
+							
+							<label>
+								<span>&nbsp;</span>
+								<input type="button" id="add-ingredient-to-recipe" value="Add ingredient">
+								<input type="button" id="closeModal" value="Cancel">
+							</label> 	
+				</fieldset>
+		</form>
+	</div>
+</div>
+
 	<p><?=$data['flash']?></p>
 	<!--Load the recipe table data-->
 	<script type="text/javascript">
@@ -20,7 +40,7 @@
 
 	<div class="recipe" ng-controller="recipeEditController as recipeCtrl" ng-init="recipe_id = recipeCtrl.recipe.id">
 		<form method="post" action="/armourtake/public/account/update_recipe/?recipe_id=1">	
-			<h1>Recipe</h1>
+			<h1>{{recipeCtrl.recipe.recipeName}} - recipe</h1>
 				<br>
 				<input class="hidden" type="text" id="recipe_id" name="recipe_id" ng-model="recipeCtrl.recipe.id" />
 				<label class="recipe_label">
@@ -28,7 +48,7 @@
 			<!--Name-->
 				<input type="text" id="recipe_name" name="recipe_name" ng-model="recipeCtrl.recipe.recipeName" />
 				</label>
-				<br><br>
+				<br>
 				<label class="recipe_label">
 				Yeild: 
 			<!--Yeild for recipe-->
@@ -42,48 +62,54 @@
 				</select>
 				</label>
 				<label class="recipe_label">
-				Total cost: 
+				<strong>Total cost:</strong> 
 			<!--Cost of recipe-->
-				$<input type="text" readOnly="true" id="recipe_cost" name="recipe_cost" ng-model="getTotalCost()"\>
-				<!--<input type="hidden" id="recipe_cost" name="recipe_cost" ng-model="recipeCtrl.recipeCost">-->
+				{{getTotalCost() | currency}}<input class="hidden" type="text" readOnly="true" id="recipe_cost" name="recipe_cost" ng-model="getTotalCost()"\>
 				</label>
 				<label class="recipe_label">
-				Cost per {{recipeCtrl.recipe.yeildUnit}}: 
+				<strong>Cost per {{recipeCtrl.recipe.yeildUnit}}:</strong> 
 			<!--Cost of recipe-->
-				$<input type="text" readOnly="true" id="recipe_individual_cost" name="recipe_individul_cost" ng-model="getTotalCost()/recipeCtrl.recipe.yeild | currency"\>
+				{{getTotalCost()/recipeCtrl.recipe.yeild | currency}}<input class="hidden" type="text" readOnly="true" id="recipe_individual_cost" name="recipe_individul_cost" ng-model="getTotalCost()/recipeCtrl.recipe.yeild | currency"\>
 				</label>
-
+				<br>
 				<br>
 			<!--Ingredients list-->
 				<section ng-repeat="ingredient in recipeCtrl.ingredients">
 				<!--product_id-->
 					<input class="hidden" type="text" id="product_id{{$index}}" name="product_id{{$index}}" ng-model="ingredient.Products_id">	
+				<!--Product name-->
+					{{ingredient.productName}}
 				<!--quantity-->
 					<input type="text" id="quantity" name="quantity{{$index}}" ng-model="ingredient.quantity">			
 				<!--Unit dropdown-->
 					<select id="unit" name="unit{{$index}}" ng-model="ingredient.unit">
 						<option ng-repeat="unit in recipeCtrl.units" ng-selected="unit.id == ">{{unit.Name}}</option>
 					</select>
-				<!--Product name-->
-					<input type="text" disabled="" ng-model="ingredient.productName">
 				<!--Cost calculated for each unit selected-->
 					$<input type="text" disabled=""  ng-model="ingredient.cost = ingredient.costPerKiloUnit * ingredient.Ratio">
 				<!--Total cost for quantity*cost of unit selected-->
 					Total $<input type="text" readOnly="true" id="total_cost{{$index}}" name="total_cost{{$index}}" ng-model="totalcost = ingredient.cost * ingredient.quantity">
 				</section>
+				<button type="button" id="add-new-ingredient-to-recipe">Add new ingredient</button>		
 				<br>
 				<br>
 			<!--Method-->
 				Method:<br>
-				<textarea class="method" rows=10 cols=100 id="recipe_method" name="recipe_method">{{recipeCtrl.recipe.method}}</textarea>
+				<textarea class="method" rows=10 cols=100 id="recipe_method" name="recipe_method">{{decodeHtml(recipeCtrl.recipe.method)}}</textarea>
 				</label>
 			<!--Buttons-->
-				<input type=submit value="Update" class="recipe_buttons">
+				<input type=submit value="Update" id="submit_submit" name="submit" class="recipe_buttons">
 			<!--Cancel the action-->
-				<input type=submit value="cancel" class="recipe_buttons">
-			<!--Delete the entry-->
-				<input type=submit value="Delete" class="recipe_delete">
+				<a href="/armourtake/public/account/recipes/"><button type=button class="recipe_buttons">Cancel</button></a>
+
 		</form>
+
+			<!--Delete the entry-->
+			<form method="post" action="/armourtake/public/account/delete_recipe/">
+				<input class="hidden" type="text" id="recipe_id" name="recipe_id" ng-model="recipeCtrl.recipe.id" />
+				<button id="delete-submit" class="recipe_delete">Delete</button>
+			</form>
+
 		<p class="goback">
 			<a href="<?php echo dirname($_SERVER['PHP_SELF']) . '/account/recipes'; ?>">Back to Recipes</a>
 		</p>

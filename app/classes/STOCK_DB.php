@@ -55,6 +55,7 @@ class STOCK_DB {
 	}
 
 	private function action($action, $table, $where = array(), $user_id = null) {
+		$user = new User();
 		if(count($where) === 3){
 			$operators = array('=', '<', '>', '<=', '>=', '<>');
 
@@ -68,26 +69,10 @@ class STOCK_DB {
 				}else{
 					$sql = "{$action} FROM {$table} WHERE {$field} {$operator} ?";
 				}
-				if(!$this->query($sql, array($value, $user_id))->error()){
+				if(!$this->query($sql, array($value, $user->data()->id))->error()){
 					return $this;
 				}
 			}
-		}
-		return false;
-	}
-
-	public function joins($recipeName, $table1, $join_table, $table2, $user_id){
-		$sql = "SELECT {$table1}.*, {$table2}.*, {$join_table}.* 
-			FROM {$table1} 
-			JOIN {$join_table} 
-			ON {$table1}.`id`={$join_table}.`{$table1}_id` 
-			AND {$table1}.`user` = ?
-			JOIN {$table2} 
-			ON {$join_table}.`{$table2}_id` = {$table2}.`id` 
-			AND {$table2}.`user` = ?
-			AND {$table2}.`recipeName` = ?";
-		if(!$this->query($sql, array($user_id, $user_id, $recipeName))->error()){
-			return $this;
 		}
 		return false;
 	}
@@ -166,8 +151,8 @@ class STOCK_DB {
 		return $this->action('SELECT *', $table, $where, $user_id);
 	}
 
-	public function delete($table, $where, $user_id){
-		return $this->action('DELETE', $table, $where, $user_id);
+	public function delete($table, $where){
+		return $this->action('DELETE', $table, $where);
 	}
 
 	public function error(){

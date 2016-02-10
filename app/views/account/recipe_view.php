@@ -37,7 +37,7 @@
 		<span class="recipe_heading">Method:</span>
 		</p>
 		<p class="recipe_method">
-			{{recipeCtrl.method}}
+			{{recipeCtrl.recipe.method}}
 		</p>
 		<p>
 		<a href="/armourtake/public/account/recipes">Back to Recipes</a>
