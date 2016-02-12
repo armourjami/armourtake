@@ -15,7 +15,7 @@
 		<h1 class="logo">Armourtake</h1>
 	</div>
 	<nav class="nav">
-		<?if($data['page_name']){echo '<h3 class="page-name">' . $data['page_name'] . "</h3>\n";}?>
+		<?php if($data['page_name']){echo '<h3 class="page-name">' . $data['page_name'] . "</h3>\n";}?>
 		<ul>
 			<li class="navbar"><a href="/armourtake/public/home">Home</a></li>
 			<?php 
