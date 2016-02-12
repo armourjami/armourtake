@@ -4,9 +4,9 @@
 	</div>
 	<div id="modalContent">
 		<form class="edit-form">
-			<fieldset>
+			<fieldset ng-controller="productTableController as productsCtrl">
 							<label> <span>Name</span>
-								<input type="text" name="name" id="name"/>
+								<select id="new-product" ng-model="productsCtrl.new" ng-options="product.productName for product in productsCtrl.products track by product.id" ></select>
 							</label>
 							
 							<label>
@@ -22,7 +22,7 @@
 	<p><?=$data['flash']?></p>
 	<!--Load the recipe table data-->
 	<script type="text/javascript">
-		var json = '<?=$data['recipe']?>';
+		var json = '<?=$data['recipe']?>';	
 		var recipe = JSON.parse(json);
 
 		json = '<?=$data['units']?>';
@@ -33,6 +33,7 @@
 
 		json = '<?=$data['products']?>';
 		var products = JSON.parse(json); 
+
 	</script>
 	<!--FOR DEBUGGING: <?=var_dump($data['recipe'])?>-->
 	<!--FOR DEBUGGING: <?=var_dump($data['units'])?>-->
@@ -74,7 +75,7 @@
 				<br>
 				<br>
 			<!--Ingredients list-->
-				<section ng-repeat="ingredient in recipeCtrl.ingredients">
+				<section id="ingredients-list" ng-repeat="ingredient in recipeCtrl.ingredients">
 				<!--product_id-->
 					<input class="hidden" type="text" id="product_id{{$index}}" name="product_id{{$index}}" ng-model="ingredient.Products_id">	
 				<!--Product name-->
@@ -133,3 +134,8 @@
 			*/
 		?>
 	</div>	
+	<script type="text/javascript">
+		var pageInit = function() {
+    			Modal.switch_on_edit_buttons('add-new-ingredient-to-recipe');
+		};
+	</script>

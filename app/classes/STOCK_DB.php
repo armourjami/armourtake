@@ -64,20 +64,21 @@ class STOCK_DB {
 			$value = $where[2];
 
 			if(in_array($operator, $operators)){
-				if(isset($user_id)){
-					$sql = "{$action} FROM {$table} WHERE {$field} {$operator} ? AND `user` = ?";
-				}else{
-					$sql = "{$action} FROM {$table} WHERE {$field} {$operator} ?";
-				}
+				$sql = "{$action} FROM {$table} WHERE {$field} {$operator} ? AND `user` = ?";
 				if(!$this->query($sql, array($value, $user->data()->id))->error()){
 					return $this;
 				}
+			}
+		}else if($where[0] === 1){
+			$sql = "{$action} FROM {$table} WHERE 1 AND `user` = ?";
+			if(!$this->query($sql, array($user->data()->id))->error()){
+				return $this;
 			}
 		}
 		return false;
 	}
 
-	public function join($tables = array()){
+	public function join($tables = array(), $distinct = null){
 		$user = new User();
 	//Set table rules, ANDs etc
 		$table_rules = array();
@@ -122,6 +123,7 @@ class STOCK_DB {
 		}
 	//Build the final query**************************
 		$sql = "SELECT ";
+		$sql .= $distinct ? 'DISTINCT' : '';
 		//What fields we are selecting
 		for($j = 0; $j < count($table_selections); $j++){
 			$sql .= $table_selections[$j];
@@ -149,6 +151,10 @@ class STOCK_DB {
 
 	public function get($table, $where, $user_id = null){
 		return $this->action('SELECT *', $table, $where, $user_id);
+	}
+	
+	public function getOneOfEach($table, $where, $user_id = null){
+		return $this->action('SELECT DISTINCT *', $table, $where, $user_id);
 	}
 
 	public function delete($table, $where){

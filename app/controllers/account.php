@@ -205,8 +205,32 @@ class account extends Controller{
 				$pro_rec = $pros_recs->data();	
 				$ingredients_json  = json_encode($pro_rec);
 
-				$products = new products(); 
-				$products_json = json_encode($products->getColumn('productName'));
+				$products = $this->_db->join(
+					array(//table1, tablejoin, table2 
+						 array( 
+							'table_name' => 'Products',
+							'next_table_name' => 'ProductRecipes',
+							'table_column' => 'id',
+							'next_table_column' => 'Products_id',
+							'selections' => array(
+								'productName',
+							)					 
+						 ),      
+						 array( 
+							'table_name' => 'ProductRecipes', 
+							'next_table_name' => null,
+							'table_column' => null,
+							'next_table_column' => null,
+							'selections' => array(
+								'Products_id',
+							)
+						 )      
+					)
+				, true);//select distinct
+			
+				//$products = $this->_db->getOneOfEach('ProductRecipes', [1]); 
+				$products = $products->results();
+				$products_json = json_encode($products);
 
 				
 				$this->view('account/recipe_edit', [

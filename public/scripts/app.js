@@ -20,7 +20,7 @@
 		this.recipe = recipe;			
 		this.units = units;
 		this.ingredients = ingredients;
-		this.products = products;
+//		this.products = products;
 
 		$scope.getTotalCost = function(){
 			var total = 0;
@@ -41,6 +41,7 @@
 	//For list of Products, aka Products index
 	app.controller("productTableController", function(){
 		this.products = products;			
+		this.new;
 	});
 	
 

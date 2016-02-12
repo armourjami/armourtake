@@ -1,9 +1,3 @@
-function decodeHtml(html) {
-    var txt = document.createElement("textarea");
-    txt.innerHTML = html;
-    return txt.value;
-}
-
 $(document).ready(function(){
 	$('#user-dropdown').hover(function(){
 		$('#drop-down').slideDown(100);
@@ -13,7 +7,7 @@ $(document).ready(function(){
 	
 	//fix font reset bug
 	$('#main-css')[0].href = $('#main-css')[0].href;
-
+	
 	$('#delete-submit').on('click', function(){
 		var confirmed = confirm('Are you sure you want to delete?');
 		//if 'Cancel' cancel submission
@@ -21,4 +15,7 @@ $(document).ready(function(){
 			return false;
 		}
 	});
+	
+	pageInit();
+
 });

@@ -1,19 +1,21 @@
-// Script 9.10 - modal.js
-
+//Modal static class
+//Design for one modal per page
+var Modal = function(){
+};
 // Function called to open the window:
-function openModal() {
+Modal.openModal = function () {
     'use strict';
 
     // Add a click handler to the close modal button:
-    $('#closeModal').on('click', closeModal);
-    
+    $('#closeModal').on('click', Modal.closeModal);
     // Make the modal DIV visible:
     $('#modal').css('display', 'inline-block');
 
-} // End of openModal() function.
+};
 
 // Function called to close the window:
-function closeModal() {
+
+Modal.closeModal = function () {
     'use strict';
 
     // Make the modal DIV invisible:
@@ -22,21 +24,13 @@ function closeModal() {
     // Remove the click handler on the close modal button:
     $('#closeModal').on('click', null);
     
-} // End of closeModal() function.
-
-function switch_on_edit_buttons(id){
+};
+Modal.switch_on_edit_buttons = function (id){
     var button = $('#' + id);
-    button.on('click', openModal);
-}
+    button.on('click', Modal.openModal);
+};
 
-function switch_off_edit_buttons(id){
+Modal.switch_off_edit_buttons = function (id){
     var button = $('#' + id);
     button.on('click', null);
-}
-
-// Establish functionality on window load:
-window.onload = function() {
-    'use strict';
-    // Add a click handler to the open modal button:
-    switch_on_edit_buttons('add-new-ingredient-to-recipe');
 };
