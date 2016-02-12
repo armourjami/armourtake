@@ -15,9 +15,9 @@ include_once '../app/includes/header.php';
 </p>
 
 <p>
-	<a href="login/">Log in here</a>
+	<a href="/armourtake/public/login">Log in here</a>
 	 or 
-	<a href="register/">Register</a>
+	<a href="/armourtake/public/register/">Register</a>
 </p>
 
 
