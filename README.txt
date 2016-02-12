@@ -1,4 +1,4 @@
-##Breif notes on the functionality of the MVC structure
+##Brief notes on the functionality of the MVC structure
 
 ###Views
 
