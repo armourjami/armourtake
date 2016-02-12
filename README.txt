@@ -1,3 +1,5 @@
+##Breif notes on the functionality of the MVC structure
+
 ###Views
 
 When creating view files all dynamic data should be included via the $data array passed to the page.
