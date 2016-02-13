@@ -1,5 +1,6 @@
 ##Brief notes on the functionality of the MVC structure
 
+This is where I will write notes that help me to remember how to use the code.
 ###Views
 
 When creating view files all dynamic data should be included via the $data array passed to the page.
