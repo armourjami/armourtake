@@ -19,5 +19,8 @@ include_once '../app/includes/header.php';
 	 or 
 	<a href="/armourtake/public/register/">Register</a>
 </p>
+<p>
+	Please login to view/edit and delete products/recipes/suppliers/dishes etc...
+</p>
 
 
