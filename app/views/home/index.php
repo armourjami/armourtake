@@ -13,7 +13,9 @@ include_once '../app/includes/header.php';
 		}
 	?>
 </p>
-
+<p>
+	Armourtake kitchen stocktaking, recipe costing and website CMS
+</p>
 <p>
 	<a href="/armourtake/public/login">Log in here</a>
 	 or 
