@@ -14,9 +14,7 @@ include_once '../app/includes/header.php';
 	?>
 </p>
 <p>
-	Something here
 	Armourtake kitchen stocktaking, recipe costing and website CMS
-	Something here
 </p>
 <p>
 	<a href="/armourtake/public/login">Log in here</a>
