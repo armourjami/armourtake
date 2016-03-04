@@ -181,7 +181,8 @@ CREATE TABLE IF NOT EXISTS `mdb`.`Products` (
 
 INSERT INTO `Products`(`user`, `productName`, `purchaseUnit`, `purchaseUnitPrice`, `purchaseUnitWeight`, `yeild`, `costPerKiloUnit`, `Suppliers_id`, `UnitName`) VALUES
 (1, 'Bread', 'Loaf', 2.00, 1.00, 100, 2.00, 1, 'Loaf'),
-(1, 'Milk', '2L Bottle', 3.95, 2.00, 100, 2.00, 1, 'Litre'); 
+(1, 'Milk', '2L Bottle', 3.95, 2.00, 100, 2.00, 1, 'Litre'),
+(1, 'Cereal', '400G bag', 2.95, 0.40, 100, 7.37, 1, 'Kilo'); 
 
 -- -----------------------------------------------------
 -- Table `mdb`.`Contacts`
@@ -240,6 +241,7 @@ DROP TABLE IF EXISTS `mdb`.`ProductRecipes` ;
 
 CREATE TABLE IF NOT EXISTS `mdb`.`ProductRecipes` (
   `user` INT(11) NOT NULL,
+  `id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `Products_id` INT(11) NOT NULL,
   `Recipes_id` INT(11) NOT NULL,
   `quantity` DECIMAL(10,2) NOT NULL DEFAULT 1.00,

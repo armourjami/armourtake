@@ -15,7 +15,7 @@ $(document).ready(function(){
 			return false;
 		}
 	});
-	
-	pageInit();
 
+	//Set up the modal buttons
+	pageInit()
 });

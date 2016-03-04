@@ -3,3 +3,8 @@ var decodeHtml = function(html) {
     txt.innerHTML = html;
     return txt.value;
 }
+
+//Set up the modal buttons
+var pageInit = function() {
+	Modal.switch_on_edit_buttons('add-new-ingredient-to-recipe');
+};

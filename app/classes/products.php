@@ -13,16 +13,20 @@ class products {
 		}		
 		$data = $this->_db->get('Products', ['id', '>=', 1], $this->_user->data()->id);
 		$this->_count = count($data);
-		$this->_products = array();
-		foreach($data->results() as $result){
-			$product = new product($result->id);
-			array_push($this->_products, $product);
-		}
+		$this->_products = $data->results();
 	}
-	
+
+	public function toJson(){
+		return json_encode($this->_products);
+	}
+
+	public function toArray(){
+		return json_decode($this->toJson(),true);
+	}
 	public function findProduct($id){
-		foreach($this->_products as $product){
-			if($product->data()->id == $id){
+		$products = $this->toArray();
+		foreach($products as $product){
+			if($product['id'] == $id){
 				return $product;
 			}
 		}
@@ -31,7 +35,7 @@ class products {
 	public function getColumn($column_name){
 		$list = array();
 		foreach($this->_products as $product){
-			$list[$product->data()->id] = $product->data()->$column_name;
+			$list[$product->id] = $product->$column_name;
 		}
 		return $list;
 	}
@@ -44,12 +48,4 @@ class products {
 		return $this->_count;
 	}
 	
-	public function addProduct($product){
-		if(isset($product) && get_class($product) == 'product'){
-			array_push($this->_products, $product);	
-			return true;
-		}else{
-			return false;
-		}
-	}
 }

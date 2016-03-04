@@ -1,4 +1,3 @@
-
 <?php
 				
 class account extends Controller{
@@ -9,6 +8,9 @@ class account extends Controller{
 		}
 		$user = new User();
 		if($user->isLoggedIn()){	
+			$recipe = new Recipe(1);
+			echo $recipe->toArray()['ingredients'][0]['productName'];
+			die();
 			$this->view('account/index', [
 				'register' => true, 
 				'loggedIn' => 1, 
@@ -34,12 +36,10 @@ class account extends Controller{
 			$db = STOCK_DB::getInstance();						
 
 			//load database content
-			$products = $db->get('Products', ['id', '>=', '1'], $user->data()->id);
-			$product_count = $products->count();
-			$json_products = json_encode($products->results());	
+			$products = new products();
 
 			$this->view('account/products', [
-				'products' => $json_products,
+				'products' => $products->toJson(),
 				'register' => true, 
 				'loggedIn' => 1, 
 				'flash' => $flash_string, 
@@ -60,7 +60,6 @@ class account extends Controller{
 		}
 		$user = new User();
 		if($user->isLoggedIn()){
-			//The products table will be rendered on the view page	
 			$this->view('account/units', [
 				'register' => true, 
 				'loggedIn' => 1, 
@@ -86,12 +85,10 @@ class account extends Controller{
 			$db = STOCK_DB::getInstance();						
 
 			//load database content
-			$recipes = $db->get('Recipes', ['id', '>=', '1'], $user->data()->id);
-			$recipe_count = $recipes->count();
-			$json_recipes = json_encode($recipes->results());	
-
+			$recipes = new recipes();
+			
 			$this->view('account/recipes', [
-				'recipes' => $json_recipes,
+				'recipes' => $recipes->toJson(),
 				'register' => true, 
 				'loggedIn' => 1, 
 				'flash' => $flash_string, 
@@ -194,35 +191,34 @@ class account extends Controller{
 			if(isset($idRecipe)){
 				$this->_db = STOCK_DB::getInstance();						
 				
-				$recipe = $this->_db->get('Recipes', ['id', '=', $idRecipe], $user->data()->id);
-				$recipe = $recipe->first();
-				$recipe_json  = json_encode($recipe);
-					
+				$recipes = new recipes();
+				$recipe = $recipes->findRecipe($idRecipe);
+
 				$units = $this->_db->get('Unit', ['Name', '<>', ''], $user->data()->id);
 				$units_json  = json_encode($units->results());
 
-				$pros_recs = new recipe($idRecipe);
-				$pro_rec = $pros_recs->data();	
-				$ingredients_json  = json_encode($pro_rec);
-
 				$products = $this->_db->join(
-					array(//table1, tablejoin, table2 
+					array( 
 						 array( 
 							'table_name' => 'Products',
-							'next_table_name' => 'ProductRecipes',
-							'table_column' => 'id',
-							'next_table_column' => 'Products_id',
+							'next_table_name' => 'Unit',
+							'table_column' => 'unitName',
+							'next_table_column' => 'Name',
 							'selections' => array(
+								'id',
 								'productName',
+								'yeild',
+								'costPerKiloUnit',
+								'unitName',
 							)					 
 						 ),      
 						 array( 
-							'table_name' => 'ProductRecipes', 
+							'table_name' => 'Unit', 
 							'next_table_name' => null,
 							'table_column' => null,
 							'next_table_column' => null,
 							'selections' => array(
-								'Products_id',
+								'Ratio',
 							)
 						 )      
 					)
@@ -239,10 +235,9 @@ class account extends Controller{
 					'flash' => $flash_string, 
 					'name' => $user->data()->name, 
 					'page_name' => "Edit recipe",
-					'ingredients' => $ingredients_json,
 					'products' => $products_json,
  					'user_id' => $user->data()->id,
-					'recipe' => $recipe_json,
+					'recipe' => json_encode($recipe),
 					'units' => $units_json,
 				]);
 
@@ -281,6 +276,7 @@ class account extends Controller{
 
 				//Check each field to see what needs to be update
 				$entry_changes = array();
+				//Verify non repeating information
 				$validate = new Validation();
 				$validation = $validate->check($_POST, array(
 					'recipe_name' => array(
@@ -326,11 +322,20 @@ class account extends Controller{
 					}
 				}
 				$error_string = "";
+				/*
+					-if the ingredient is new add it
+					-if the ingredient is gone, delete it
+					-is the ingredient already in the recipe, update it
+
+				*/
 				echo var_dump($_POST);
+
+				//Add any new ingredients to the list here
+				
 				$i = 0;
 				foreach($ingredients as $value){
 
-					if(Input::get("product_id$i") != ""){
+					if(Input::get("id$i") != ""){
 						if(Input::get("quantity$i") != $value['quantity'] || Input::get("unit$i") != $value['unit']){
 							//Validate changes	
 							$validate = new Validation();

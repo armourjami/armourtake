@@ -6,10 +6,12 @@ class STOCK_DB {
 		$_query,
 		$_error = false,
 		$_results,
-		$_count = 0;
+		$_count = 0,
+		$_user;
 
 	public function __construct(){
 		try{
+			$this->_user = new User();
 			$this->_pdo = new PDO('mysql:host=' . Config::get('mysql/host') . ';dbname=' . Config::get('mysql/db'), Config::get('mysql/username'), Config::get('mysql/password'));
 			$this->_pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 			$this->_pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -55,7 +57,6 @@ class STOCK_DB {
 	}
 
 	private function action($action, $table, $where = array(), $user_id = null) {
-		$user = new User();
 		if(count($where) === 3){
 			$operators = array('=', '<', '>', '<=', '>=', '<>');
 
@@ -65,13 +66,13 @@ class STOCK_DB {
 
 			if(in_array($operator, $operators)){
 				$sql = "{$action} FROM {$table} WHERE {$field} {$operator} ? AND `user` = ?";
-				if(!$this->query($sql, array($value, $user->data()->id))->error()){
+				if(!$this->query($sql, array($value, $this->_user->data()->id))->error()){
 					return $this;
 				}
 			}
 		}else if($where[0] === 1){
 			$sql = "{$action} FROM {$table} WHERE 1 AND `user` = ?";
-			if(!$this->query($sql, array($user->data()->id))->error()){
+			if(!$this->query($sql, array($this->_user->data()->id))->error()){
 				return $this;
 			}
 		}
@@ -79,7 +80,6 @@ class STOCK_DB {
 	}
 
 	public function join($tables = array(), $distinct = null){
-		$user = new User();
 	//Set table rules, ANDs etc
 		$table_rules = array();
 		$final_values = array();
@@ -96,7 +96,7 @@ class STOCK_DB {
 			}
 			$x++;
 		}
-		array_push($final_values, $user->data()->id);
+		array_push($final_values, $this->_user->data()->id);
 	//Build field SELECT strings*********************
 		$table_selections = array();	
 
@@ -105,7 +105,7 @@ class STOCK_DB {
 			$table_name = $tables[$i]['table_name'];
 			$table_selections[$i] = '';
 			if(!empty($tables[$i]['selections']) && $tables[$i]['selections'][0] == '*'){
-				$table_selections .= "`{$table_name}`.*";
+				$table_selections[$i] .= "`{$table_name}`.*";
 				//Add commer if neccesary
 				if(($i + 1) < count($tables[$i])){
 						$table_selections[$i] .= ", ";
@@ -150,11 +150,11 @@ class STOCK_DB {
 	}
 
 	public function get($table, $where, $user_id = null){
-		return $this->action('SELECT *', $table, $where, $user_id);
+		return $this->action('SELECT *', $table, $where, $this->_user->data()->id);
 	}
 	
 	public function getOneOfEach($table, $where, $user_id = null){
-		return $this->action('SELECT DISTINCT *', $table, $where, $user_id);
+		return $this->action('SELECT DISTINCT *', $table, $where, $this->_user->data()->id);
 	}
 
 	public function delete($table, $where){
@@ -165,9 +165,9 @@ class STOCK_DB {
 		return $this->_error;
 	}
 
-	public function insert($table, $fields = array(), $user_id){
+	public function insert($table, $fields = array(), $user_id = null){
 		//add the user to the field array so it is generated in the sql statement
-		$fields['user'] = $user_id;
+		$fields['user'] = $this->_user->data()->id;
 		$keys = array_keys($fields);
 		$values = null;
 		$x = 1;
@@ -186,7 +186,7 @@ class STOCK_DB {
 		return false;
 	}
 
-	public function update($table, $id, $field, $user_id){
+	public function update($table, $id, $field){
 		$set = '';
 		$x = 1;
 		//add the user to the field array so it is generated in the sql statement
@@ -198,32 +198,49 @@ class STOCK_DB {
 			}
 			$x++;
 		}
-		$sql = "UPDATE {$table}  SET {$set} WHERE id = {$id} AND user = {$user_id};";
+		$field['user'] = $this->_user->data()->id;
+		$sql = "UPDATE {$table} SET {$set} WHERE id = {$id} AND user = ?;";
 		if(!$this->query($sql, $field)->error()){
 			return true;
 		}
 		return false;
 		
 	}
-
-	public function update_recipe($products_id, $recipes_id, $field, $user_id){
-		echo "recipe id " . $recipes_id;
+	
+	public function update_recipe($table, $field = array(), $wheres = array()){
+	//Can set multiple columns where multiple conditions
 		$set = '';
-		$x = 1;
-		//add the user to the field array so it is generated in the sql statement
+		$x = 1;	
+		$fields = array();
+		//Create the set string
 		foreach($field as $name => $value){
-			$set .= "{$name} = ?";
+			$set .= "`{$name}` = ?";
+			array_push($fields, $value);
 			if($x < count($field)){
 				$set .= ', ';
 			}
-			$x++;
-		}
-		$sql = "UPDATE `ProductRecipes`  SET {$set} WHERE Recipes_id = {$recipes_id} AND Products_id = {$products_id} AND user = {$user_id};";
 
-		echo $sql;
-		if(!$this->query($sql, $field)->error()){
-			return true;
+		$x++;
 		}
+		//Create the where string
+		$where_statement = '';
+		foreach($wheres as $where){
+			$field = $where[0];
+			$operator = $where[1];
+			$value = $where[2];
+			$operators = array('=', '<', '>', '<=', '>=', '<>');
+
+			if(in_array($operator, $operators)){ 
+				$where_statement .= $where_statement !== '' ? "AND " : '';
+				$where_statement .= "`{$field}` {$operator} ? ";
+				array_push($fields, $value);
+			}
+		}
+		array_push($fields, $this->_user->data()->id);
+		$sql = "UPDATE `{$table}` SET {$set} WHERE {$where_statement} AND user = ?;";
+		if(!$this->query($sql, $fields)->error()){
+			return true;
+		}	
 		return false;
 	}
 
