@@ -8,9 +8,6 @@ class account extends Controller{
 		}
 		$user = new User();
 		if($user->isLoggedIn()){	
-			$recipe = new Recipe(1);
-			echo $recipe->toArray()['ingredients'][0]['productName'];
-			die();
 			$this->view('account/index', [
 				'register' => true, 
 				'loggedIn' => 1, 
