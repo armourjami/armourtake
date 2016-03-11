@@ -25,6 +25,7 @@ class User {
 			$this->find($user);
 			$this->_isLoggedIn = true;	
 		}
+		return $this;
 	}
 
 	public function update($fields = array(), $id = null){

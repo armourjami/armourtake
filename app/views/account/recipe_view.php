@@ -8,8 +8,7 @@
 		var json = '<?=$data['units']?>';
 		var units = JSON.parse(json);
 	
-		var json = '<?=$data['ingredients']?>';
-		var ingredients = JSON.parse(json);
+		console.log(recipe.ingredients[0]);
 
 	</script>
 	<!--FOR DEBUGGING: <?=var_dump($data['recipe'])?>-->
@@ -25,11 +24,11 @@
 		<p>
 		<table>
 			<tbody>
-				<tr ng-repeat="ingredient in recipeCtrl.ingredients">
-					<td>{{ingredient.quantity}}</td>
-					<td>{{ingredient.unitName}}</td>
+				<tr ng-repeat="ingredient in recipeCtrl.recipe.ingredients">
+					<td>{{ingredient.quantity | decimals:1}}</td>
+					<td>{{ingredient.unit}}</td>
 					<td>{{ingredient.productName}}</td>
-					<td>{{(ingredient.quantity * 1 * ingredient.costPerKiloUnit) | currency}}</td>
+					<td>{{(ingredient.quantity * ingredient.costPerKiloUnit) | currency}}</td>
 				</tr>
 			</tbody>
 		</table>

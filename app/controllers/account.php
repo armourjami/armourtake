@@ -8,6 +8,7 @@ class account extends Controller{
 		}
 		$user = new User();
 		if($user->isLoggedIn()){	
+
 			$this->view('account/index', [
 				'register' => true, 
 				'loggedIn' => 1, 
@@ -29,14 +30,12 @@ class account extends Controller{
 		}
 		$user = new User();
 		if($user->isLoggedIn()){
-			//The products table will be rendered on the view page	
-			$db = STOCK_DB::getInstance();						
 
 			//load database content
-			$products = new products();
+			$products = Product::toArray();
 
 			$this->view('account/products', [
-				'products' => $products->toJson(),
+				'products' => json_encode($products),
 				'register' => true, 
 				'loggedIn' => 1, 
 				'flash' => $flash_string, 
@@ -57,12 +56,16 @@ class account extends Controller{
 		}
 		$user = new User();
 		if($user->isLoggedIn()){
+
+			$units = Unit::toArray();		
+
 			$this->view('account/units', [
 				'register' => true, 
 				'loggedIn' => 1, 
 				'flash' => $flash_string, 
 				'name' => $user->data()->name, 
 				'page_name' => 'Units',
+				'units' => json_encode($units),
 				'user_id' => $user->data()->id
 			]);
 		}else{
@@ -78,14 +81,12 @@ class account extends Controller{
 		}
 		$user = new User();
 		if($user->isLoggedIn()){
-			//The recipes table will be rendered on the view page	
-			$db = STOCK_DB::getInstance();						
 
 			//load database content
-			$recipes = new recipes();
+			$recipes = Recipe::toArray();
 			
 			$this->view('account/recipes', [
-				'recipes' => $recipes->toJson(),
+				'recipes' => json_encode($recipes),
 				'register' => true, 
 				'loggedIn' => 1, 
 				'flash' => $flash_string, 
@@ -106,20 +107,14 @@ class account extends Controller{
 		}
 		$user = new User();
 		if($user->isLoggedIn()){
-			//The recipes table will be rendered on the view page	
-								
-			$this->_db = STOCK_DB::getInstance();
 			
-			$dishes = $this->_db->get('Dishes', ['id', '>=', Input::get('recipe_id')]);
-			$dish_count = $dishes->count();
-			if(!$dish_count){
-				$this->_db->delete('ProductRecipes', ['Recipes_id', '=', Input::get('recipe_id')]);
-				$this->_db->delete('Recipes', ['id', '=', Input::get('recipe_id')]);
+			if(Recipe::exists(Input::get('recipe_id'))){
+				Recipe::deleteIngredient();
 				
 				Session::flash('account', 'Recipe deleted');
 			}else{
 
-				Session::flash('account', 'Recipe could not be deleted as it is still part of a dish');
+				Session::flash('account', 'Recipe could not be deleted');
 			}
 			
 			Redirect::to('account/recipes');
@@ -129,26 +124,16 @@ class account extends Controller{
 		}
 	}
 
-	public function recipe($idRecipe = null){
+	public function recipe($recipeId = null){
 		$flash_string = '';
 		if(Session::exists('account')){
 			$flash_string = Session::flash('account');	
 		}
 		$user = new User();
 		if($user->isLoggedIn()){
-			if(isset($idRecipe)){
-				$this->_db = STOCK_DB::getInstance();						
-				
-				$recipe = $this->_db->get('Recipes', ['id', '=', $idRecipe], $user->data()->id);
-				$recipe = $recipe->first();
-				$recipe_json  = json_encode($recipe);
-					
-				$units = $this->_db->get('Unit', ['Name', '<>', ''], $user->data()->id);
-				$units_json  = json_encode($units->results());
-
-				$pros_recs = new recipe($idRecipe);
-				$pro_rec = $pros_recs->data();	
-				$ingredients_json  = json_encode($pro_rec);
+			if(isset($recipeId)){
+				$recipe = Recipe::toArray($recipeId);
+				$units = Unit::toArray();
 
 				$this->view('account/recipe_view', [
 					'register' => true, 
@@ -157,9 +142,8 @@ class account extends Controller{
 					'name' => $user->data()->name, 
 					'page_name' => "",
 					'user_id' => $user->data()->id,
-					'units' => $units_json,
-					'recipe' => $recipe_json,
-					'ingredients' => $ingredients_json,
+					'units' => json_encode($units),
+					'recipe' => json_encode($recipe),
 				]);
 
 			}else{		
@@ -396,11 +380,9 @@ class account extends Controller{
 		$user = new User();
 		if($user->isLoggedIn()){
 			if(isset($idDish)){
-				$this->_db = STOCK_DB::getInstance();						
 				
-				$dish = $this->_db->get('Dishes', ['id', '=', $idDish], $user->data()->id);
-				$dish = $dish->first();
-				
+				$dish = Dish::toArray($idDish);
+					
 				$this->view('account/dish_view', [
 					'register' => true, 
 					'loggedIn' => 1, 
@@ -408,12 +390,7 @@ class account extends Controller{
 					'name' => $user->data()->name, 
 					'page_name' => 'Dish recipe',
 					'user_id' => $user->data()->id,
-					'dish_name' => $dish->dishName,
-					'dish_price' => $dish->dishPrice,
-					'dish_cost' => $dish->costPrice,
-					'margin' => $dish->margin,
-					'type' => $dish->Types_Type,
-					'gross_revenue' => $dish->grossRevenue
+					'dish' => json_encode($dish),
 				]);
 			}else{
 				$this->view('account/dishes', [
@@ -439,12 +416,16 @@ class account extends Controller{
 		$user = new User();
 		if($user->isLoggedIn()){
 			//The products table will be rendered on the view page	
+				
+			$dishes = Dish::toArray();
+	
 			$this->view('account/dishes', [
 				'register' => true, 
 				'loggedIn' => 1, 
 				'flash' => $flash_string, 
 				'name' => $user->data()->name, 
 				'page_name' => 'Dishes',
+				'dishes' => json_encode($dishes),
 				'user_id' => $user->data()->id
 			]);
 		}else{

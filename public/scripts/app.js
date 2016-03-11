@@ -2,6 +2,18 @@
 //Angular controller for displaying table information
 (function(){
 	var app = angular.module("armourtake", []); 
+	
+	app.filter('percentage', ['$filter', function ($filter) {
+	  	return function (input, decimals) {
+	    		return $filter('number')(input * 100, decimals) + '%';
+	  	};
+	}]);
+	
+	app.filter('decimals', ['$filter', function ($filter) {
+	  	return function (input, decimals) {
+	    		return $filter('number')(input, decimals);
+	  	};
+	}]);
 
 	//For list of Recipes. aka Recipes index
 	app.controller("recipeTableController", function(){
@@ -12,9 +24,13 @@
 	app.controller("recipeCardController", function(){
 		this.recipe = recipe;			
 		this.units = units;
-		this.ingredients = ingredients;
 	});
 	
+	//For individual Recipe
+	app.controller("dishCardController", function(){
+		this.dish = dish;			
+	});
+
 	//For editing an individual Recipe
 	app.controller("recipeEditController", function($scope){
 		this.recipe = recipe;			
@@ -86,6 +102,14 @@
 			alert(recipeEditController.recipe.recipeName);
 		};
 	});
-	
 
+	app.controller("unitTableController", function($scope){
+		this.units = units;			
+		console.log(this.units);
+	});
+
+	app.controller("dishTableController", function($scope){
+		this.dishes = dishes;			
+		console.log(this.dishes);
+	});
 })();

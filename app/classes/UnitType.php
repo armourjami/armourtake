@@ -1,30 +1,10 @@
 <?php
 
-class UnitType {
-	private $_db;
-	private $_user;
-	private $_name;
-	
-	public function __construct($name){
-		$this->_db = STOCK_DB::getInstance();
-		if(!$this->_user){
-			$this->_user = new User();
-		}	
-		$data = $this->_db->get('UnitType', ['UnitName', '=', $name])->first();
-		$this->_name = $data->UnitName;
-	}
-	
-	public function get(){
-		return $this->_name;
-	}
-
-	public function set($name){
-		$this->_unit->update('UnitType', ['UnitName', '=', $this->_name]);	
-	}
-
+class UnitType extends STOCK_DB{
 	public static function exists($name){
-		$db = STOCK_DB::getInstance();
-		if($this->_db->get('UnitType', ['UnitName', '=', $name])->count()){
+		$db = self::getInstance();
+		$sql = "SELECT * FROM `UnitType` WHERE `UnitType`.`UnitName` = ?;";
+		if($db->query($sql, [$name])->count()){
 			return true;
 		}else{
 			return false;

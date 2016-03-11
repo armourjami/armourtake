@@ -1,33 +1,33 @@
-<?php
-/*PARAMS: 	name - username
-		flash - session flash data
-		
-*/
-include_once '../app/includes/header.php';
-//include_once $_SERVER['DOCUMENT_ROOT'] . '/login/mvc/app/includes/sidenav.php';
-?>
-<div class="main-div">
+<div class="main-div" ng-app="armourtake">
 <?php
 	if(isset($data['flash'])){
 		echo '<p>' . $data['flash'] . '</p>';
 	}	
 ?>
-<?php
-/**********************
-	Build the table
-***********************/
-	$doc = new DOMDoc();
-	$doc->preserveWhiteSpace = false;
-	$table = new Table(3,3, $doc);
-	$doc->loadHTMLFile('../app/boiler_plate.html');
-	$doc->formatOutput = true;
-	$table = new units_table($doc, $data['user_id']);
-	$body = $doc->getElementsByTagName('body')->item(0);
-	$body->appendChild($table->getTableElement());
-	$doc->formatOutput = true;
-	echo $doc->saveXML();
-/*****************************
-	End building the table
-******************************/
-
-?>
+<!--Load the unit table data-->
+	<script type="text/javascript">
+		var json = '<?=$data['units']?>';
+		var units = JSON.parse(json);
+	</script>
+	<!--FOR DEBUGGING: <?=var_dump($data['units'])?>-->
+	<!--Display the recipe data-->
+	<table id="units_table" name="units_table">
+		<thead>
+			<th>Unit Name</th>
+			<th>Type</th>
+			<th>Ratio</th>
+			<th>&nbsp;</th>
+		</thead>
+		<tbody ng-controller="unitTableController as unitCtrl">
+			<tr ng-repeat="unit in unitCtrl.units">
+				<td>{{unit.Name}}</td>
+				<td>{{unit.UnitType}}</td>
+				<td>{{unit.Ratio}}</td>
+				<td><a href="/armourtake/public/account/edit_unit/{{unit.Name}}">Delete</a></td>
+			</tr>
+			<tr>
+				<td colspan="7"><a href="" id="addNewUnit">Add new Unit</a></td>
+			</tr>
+		</tbody>
+	</table>
+</div>

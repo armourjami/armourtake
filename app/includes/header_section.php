@@ -2,6 +2,7 @@
 <html>
 <head>
 	<title>Armourtake</title>
+	<meta charset="utf-8">
 	<link rel="stylesheet" type="text/css" href="/armourtake/public/css/reset.css">
 	<link id="main-css" rel="stylesheet" type="text/css" href="/armourtake/public/css/navbar.css">
 	<link rel="stylesheet" type="text/css" href="/armourtake/public/css/main.css">
@@ -16,5 +17,4 @@
 	<script type=text/javascript src="/armourtake/public/scripts/modal.js"></script>
 	<script type=text/javascript src="/armourtake/public/scripts/main.js"></script>
 	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-	<meta charset="utf-8">
 </head>

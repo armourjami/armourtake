@@ -1,37 +1,28 @@
-<?php
-/*PARAMS: 	name - username
-		flash - session flash data
-		dish_name
-		dish_price
-		dish_cost
-		margin
-		type
-		gross_revenue
-*/
-include_once '../app/includes/header.php';
-?>
-<div class="main-div">
+<div class="main-div" ng-app="armourtake">
 <?php
 	if(isset($data['flash'])){
 		echo '<p>' . $data['flash'] . '</p>';
 	}	
+	
 		
-?>
-	<div class="recipe">
-		<h1><?=$data['dish_name']?></h1>
+?>	<script type="text/javascript">
+		var json = '<?=$data['dish']?>';
+		var dish = JSON.parse(json);
+	</script>
+	<!--FOR DEBUGGING: <?=var_dump($data['dish'])?>-->
+
+	<div class="recipe" ng-controller="dishCardController as dishCtrl">
+		<h1>{{dishCtrl.dish.dishName}}</h1>
+		<br/>
 		<p>
-			Retail Price: $<?php echo number_format($data['dish_price'], 2);?>
+			Retail Price: {{dishCtrl.dish.salePrice | currency}}
 		</p>
+		<br/>
 		<p>
-			Cost Price: $<?php echo number_format($data['dish_cost'], 2);?> 
-			Gross Revenue: $<?php echo number_format($data['gross_revenue'], 2)?> 
-			Margin: <?php echo number_format($data['margin'], 0)?>%
+			Cost Price: {{dishCtrl.dish.costPrice | currency}}
+			Gross Revenue: {{dishCtrl.dish.salePrice/1.15 - dishCtrl.dish.costPrice | currency}}
+			Margin: {{(dishCtrl.dish.salePrice/1.15 - dishCtrl.dish.costPrice) / dishCtrl.dish.salePrice | percentage:2}}
 		</p>
-		<ul>
-			<li>List of recipes</li>
-			<li>This is the list</li>
-			<li>conitnueing the list</li>
-		</ul>
 	</div>	
 <?php
 	

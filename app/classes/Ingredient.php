@@ -5,7 +5,7 @@ class Ingredient extends STOCK_DB{
 		$db = self::getInstance();
 		$user = new User();	
 		$userId = $user->data()->id;
-		$sql = "SELECT `Products`.`productName`, `Products`.`id`, `ProductRecipes`.`Recipes_id`, `ProductRecipes`.`quantity`, `ProductRecipes`.`unit`, `Unit`.`Ratio`
+		$sql = "SELECT `Products`.`productName`, `Products`.`id`, `Products`.`costPerKiloUnit`, `ProductRecipes`.`Recipes_id`, `ProductRecipes`.`quantity`, `ProductRecipes`.`unit`, `Unit`.`Ratio`
 			FROM `Products`
 			JOIN `ProductRecipes`
 			ON `Products`.`id` = `ProductRecipes`.`Products_id`
@@ -25,7 +25,7 @@ class Ingredient extends STOCK_DB{
 		$db = self::getInstance();
 		$user = new User();	
 		$userId = $user->data()->id;
-		$sql = "SELECT `Products`.`productName`, `Products`.`id`, `ProductRecipes`.`Recipes_id`, `ProductRecipes`.`quantity`, `ProductRecipes`.`unit`, `ProductRecipes`.`id`, `Unit`.`Ratio`
+		$sql = "SELECT `Products`.`productName`, `Products`.`id`, `Products`.`costPerKiloUnit`, `ProductRecipes`.`Recipes_id`, `ProductRecipes`.`quantity`, `ProductRecipes`.`unit`, `ProductRecipes`.`id`, `Unit`.`Ratio`
 			FROM `Products`
 			JOIN `ProductRecipes`
 			ON `Products`.`id` = `ProductRecipes`.`Products_id`
@@ -40,12 +40,12 @@ class Ingredient extends STOCK_DB{
 		}
 	}
 	
-	public static function addIngredient($productId, $recipeId, $quantity, $unitName){
+	public static function addIngredient($recipeId, $productId, $quantity, $unitName){
 		$db = self::getInstance();
 		
 		if($db->insert('ProductRecipes', [
 			'Products_id' => $productId,
-			'Recipes_id' => $quantity,
+			'Recipes_id' => $recipeId,
 			'quantity' => $quantity,
 			'unit' => $unitName
 			]
@@ -56,7 +56,7 @@ class Ingredient extends STOCK_DB{
 		}
 	} 
 
-	public static function deleteIngredient($productId, $recipeId){
+	public static function deleteIngredient($recipeId, $productId){
 		$db = self::getInstance();
 		$sql = "DELETE FROM `ProductRecipes` WHERE `Products_id` = ? AND Recipes_id = ?;";
 		if($db->query($sql, [$productId, $recipeId])){

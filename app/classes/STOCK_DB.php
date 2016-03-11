@@ -26,6 +26,10 @@ class STOCK_DB {
 		}
 		return self::$_instance;
 	}
+	
+	public function getLastInsertId(){
+		return $this->_pdo->lastInsertId();
+	}
 
 	public function query($sql, $params = array()){
 		$this->_error = false;

@@ -1,3 +1,4 @@
+
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
@@ -251,7 +252,10 @@ CREATE TABLE IF NOT EXISTS `mdb`.`ProductRecipes` (
   CONSTRAINT fk_ProductRecipes_Products FOREIGN KEY (`Products_id`)
   REFERENCES Products(`id`),
   CONSTRAINT fk_ProductRecipes_Recipes FOREIGN KEY (`Recipes_id`)
-  REFERENCES Recipes(`id`)
+  REFERENCES Recipes(`id`),
+  CONSTRAINT fk_ProductRecipes_Unit FOREIGN KEY (`unit`)
+  REFERENCES Unit(`Name`)
+
 );
 
 -- -----------------------------------------------------
@@ -316,7 +320,7 @@ INSERT INTO `DishDietary` ( `user`, `Dietary_id`, `Dishes_id`) VALUES
 ( 1, 1, 1);
 
 -- -----------------------------------------------------
--- table `mdb`.`dishes`
+-- table `mdb`.`Dishes`
 -- -----------------------------------------------------
 
 DROP TABLE IF EXISTS `mdb`.`Dishes` ;
@@ -325,11 +329,9 @@ CREATE TABLE IF NOT EXISTS `mdb`.`Dishes` (
   `user` INT(11) NOT NULL,
   `id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `dishName` VARCHAR(45) NULL,
-  `dishPrice` DECIMAL(13,2) NOT NULL COMMENT 'including GST\n',
+  `salePrice` DECIMAL(13,2) NOT NULL COMMENT 'including GST\n',
   `costPrice` DECIMAL(13,2) NOT NULL COMMENT 'cost price of food ex get\n',
-  `margin` DECIMAL(4,2) NOT NULL COMMENT 'as a percentage',
   `yeild` INT(3) NOT NULL COMMENT 'number of dishes\n',
-  `grossRevenue` DECIMAL(13,2) NOT NULL,
   CONSTRAINT fk_Dishes_users FOREIGN KEY (`user`)
   REFERENCES users(`id`)
 );
@@ -338,8 +340,8 @@ CREATE TABLE IF NOT EXISTS `mdb`.`Dishes` (
 -- Insert default Dishes
 -- -----------------------------------------------------
 
-INSERT INTO `Dishes` (`user`, `dishName`, `dishPrice`, `costPrice`, `margin`, `yeild`, `grossRevenue`) VALUES
-( 1, 'Cupcakes with tomato sauce', 6, 2, 65, 12, 4); 
+INSERT INTO `Dishes` (`user`, `dishName`, `salePrice`, `costPrice`, `yeild`) VALUES
+( 1, 'Cupcakes with tomato sauce', 6, 2, 4); 
 
 -- -----------------------------------------------------
 -- Table `mdb`.`DishProducts`
@@ -350,12 +352,18 @@ CREATE TABLE IF NOT EXISTS `mdb`.`DishProducts` (
   `user` INT(11) NOT NULL,
   `Products_id` INT(11) NOT NULL,
   `Dishes_id` INT(11) NOT NULL,
+  `quantity` DECIMAL(10,2) NOT NULL DEFAULT 1.00,
+  `unit` VARCHAR(45) NULL COMMENT 'Portion, Litre etc',
+
   CONSTRAINT fk_DishProducts_users FOREIGN KEY (`user`)
   REFERENCES users(`id`),
   CONSTRAINT fk_DishProducts_Products FOREIGN KEY (`Products_id`)
   REFERENCES Products(`id`),
   CONSTRAINT fk_DishProducts_Dishes FOREIGN KEY (`Dishes_id`)
-  REFERENCES Recipes(`id`)
+  REFERENCES Recipes(`id`),
+  CONSTRAINT fk_DishProducts_Unit FOREIGN KEY (`unit`)
+  REFERENCES Unit(`Name`)
+
 );
 
 
@@ -369,20 +377,25 @@ CREATE TABLE IF NOT EXISTS `mdb`.`DishRecipes` (
   `user` INT(11) NOT NULL,
   `Dishes_id` INT(11) NOT NULL,
   `Recipes_id` INT(11) NOT NULL,
+  `quantity` DECIMAL(10,2) NOT NULL DEFAULT 1.00,
+  `unit` VARCHAR(45) NULL COMMENT 'Portion, Litre etc',
+
   CONSTRAINT fk_DishRecipes_users FOREIGN KEY (`user`)
   REFERENCES users(`id`),
   CONSTRAINT fk_DishRecipes_Dishes FOREIGN KEY (`Dishes_id`)
   REFERENCES Dishes(`id`),
   CONSTRAINT fk_DishRecipes_Recipes FOREIGN KEY (`Recipes_id`)
-  REFERENCES Recipes(`id`)
+  REFERENCES Recipes(`id`),
+  CONSTRAINT fk_DishRecipes_Unit FOREIGN KEY (`unit`)
+  REFERENCES Unit(`Name`)
 );
 
 -- -----------------------------------------------------
 -- Insert default values
 -- -----------------------------------------------------
 
-INSERT INTO `DishRecipes`( `user`, `Dishes_id`, `Recipes_id`) VALUES
-( 1, 1, 1);
+INSERT INTO `DishRecipes`( `user`, `Dishes_id`, `Recipes_id`, `unit`) VALUES
+( 1, 1, 1, 'Portion');
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
