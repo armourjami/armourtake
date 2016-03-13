@@ -38,6 +38,15 @@
 		this.products = products;
 		this.selected = products[0];
 
+		$scope.changeRatio = function(name, index){
+			for(var i = 0; i < units.length; i++){
+				if($scope.recipeCtrl.units[i].Name == name){
+					var newRatio = $scope.recipeCtrl.units[i].Ratio; 
+					$scope.recipeCtrl.recipe.ingredients[index].Ratio = newRatio; 				
+				}
+			}
+		};
+
 		$scope.getTotalCost = function(){
 			var total = 0;
 			for(var i = 0; i < $scope.recipeCtrl.recipe.ingredients.length; i++){
@@ -50,13 +59,11 @@
 		
 		$scope.removeItem = function(){
 			for(var i = 0; i < $scope.recipeCtrl.recipe.ingredients.length; i++){
-				console.log(this.ingredient);
 				if($scope.recipeCtrl.recipe.ingredients[i].id === this.ingredient.id){
 					$scope.recipeCtrl.recipe.ingredients.splice(i,1);	
 					return;
 				}	
 			}	
-			console.log(this.ingredient.id);	
 		};
 
 		$scope.addItem = function(){
@@ -75,18 +82,25 @@
 
 		$scope.addNewIngredient = function(){
 			//Change the selection
-			console.log(recipe);
-			var newIngredient = $scope.recipeCtrl.selected;
-			newIngredient.quantity = 1;
-			console.log(recipe.contains(newIngredient.id));
+			var newIngredient = {
+				productName: $scope.recipeCtrl.selected.productName,
+				id: $scope.recipeCtrl.selected.id,
+				costPerKiloUnit: $scope.recipeCtrl.selected.costPerKiloUnit,
+				Recipes_id: $scope.recipeCtrl.recipe.id,
+				quantity: 1,
+				unit: $scope.recipeCtrl.selected.unitName,
+				Ratio:	$scope.recipeCtrl.selected.Ratio, 
+				UnitType: $scope.recipeCtrl.selected.UnitType
+			} 
 			if(!recipe.contains(newIngredient.id)){ 
 				$scope.recipeCtrl.recipe.ingredients[$scope.recipeCtrl.recipe.ingredients.length] = newIngredient;
+				console.log($scope.recipeCtrl.recipe.ingredients[$scope.recipeCtrl.recipe.ingredients.length-1]);
 			}else{
 				alert("You may only enter each ingredient once");
 			}
-			for(var i = 0; i < $scope.recipeCtrl.recipe.ingredients.length ; i++){
-				console.log($scope.recipeCtrl.recipe.ingredients[i]);
-			}
+			//for(var i = 0; i < $scope.recipeCtrl.recipe.ingredients.length ; i++){
+			//	console.log($scope.recipeCtrl.recipe.ingredients[i]);
+			//}
 			Modal.closeModal();
 		};
 

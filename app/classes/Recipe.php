@@ -4,7 +4,7 @@
 //
 //####################################################################################################################
 
-class Recipe extends STOCK_DB{
+class Recipe extends DBassoc{
 	/*
 		Recipe::createRecipe($yeild, $unit, $method, $name, $cost, array(
 			array(
@@ -45,6 +45,30 @@ class Recipe extends STOCK_DB{
 			return false;
 		}
 	}
+	
+	public static function updateFields($recipeId, $field){
+		$user = new User();
+		$userId = $user->data()->id;
+		$db = self::getInstance();
+		$set = '';
+		$x = 1;
+		foreach($field as $name => $value){
+			$set .= "`Recipes`.`{$name}` = ?";
+			if($x < count($field)){
+				$set .= ', ';
+			}
+			$x++;
+		}
+		$field['id'] = $recipeId;
+		$field['user'] = $userId;
+		$sql = "UPDATE `Recipes` SET {$set} WHERE `Recipes`.`id` = ? AND `Recipes`.`user` = ?;";
+		echo $sql . "\n";
+		echo var_dump($field);
+		if(!$db->query($sql, $field)->error()){
+			return true;
+		}
+		return false;
+	}
 
 	public static function toArray($recipeId = null){
 		$db = self::getInstance();
@@ -84,6 +108,18 @@ class Recipe extends STOCK_DB{
 		}
 	}
 
+	public static function ingredientExists($recipeId, $productId){
+		$user = new User();
+		$userId = $user->data()->id;
+		$db = self::getInstance();
+		$sql = "SELECT * FROM `ProductRecipes` WHERE `ProductRecipes`.`Products_id` = ? AND `ProductRecipes`.`Recipes_id` = ? AND `ProductRecipes`.`user` = ?;";
+		if($db->query($sql, [$productId, $recipeId, $userId])->count()){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
 	public static function isComponent($recipeId){
 		$db = self::getInstance();
 		if($db->get('DishRecipes',['Recipes_id', '=', $recipeId])->count()){
@@ -109,16 +145,14 @@ class Recipe extends STOCK_DB{
 	}
 	
 	public static function addIngredient($recipeId, $productId, $quantity, $unitName){
+		echo $recipeId. ' ' .  $productId . ' ' . $quantity . ' ' . $unitName;
 		if(Unit::exists($unitName)){
 			$db = self::getInstance();
-			
-			if(!$db->insert('ProductRecipes', [
-				'Products_id' => $productId,
-				'Recipes_id' => $recipeId,
-				'quantity' => $quantity,
-				'unit' => $unitName
-				]
-			)){
+			$user = new User();
+			$userId = $user->data()->id;
+			$sql = "INSERT INTO `ProductRecipes` (`user`, `Products_id`, `Recipes_id`, `quantity`, `unit`) 
+				VALUES (?,?,?,?,?);";	
+			if(!$db->query($sql, [$userId, $productId, $recipeId, $quantity, $unitName])){
 				return false;
 			}
 			return true;

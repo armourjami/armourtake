@@ -25,6 +25,9 @@
 				<td><a href="/armourtake/public/account/recipe/{{recipe.id}}">View</a></td>
 				<td><a href="/armourtake/public/account/edit_recipe/{{recipe.id}}">Edit/Delete</a></td>
 			</tr>
+			<tr>
+				<td colspan="4"><a href="" id="addNewRecipe">Add new Recipe</a></td>
+			</tr>
 		</tbody>
 	</table>
 </div>

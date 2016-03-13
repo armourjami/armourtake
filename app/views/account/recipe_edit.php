@@ -2,9 +2,9 @@
 <script type="text/javascript">
 	var json = '<?=$data['recipe']?>';	
 	var recipe = new recipe(json);
-	//console.log(recipe_object);
-	//var recipe = JSON.parse(json);
-	console.log(recipe);
+console.log(recipe.ingredients[0]);
+console.log(recipe.ingredients[1]);
+console.log(recipe.ingredients[2]);
 	json = '<?=$data['units']?>';
 	var units = JSON.parse(json);
 
@@ -63,12 +63,12 @@
 				<label class="recipe_label">
 				<strong>Total cost:</strong> 
 			<!--Cost of recipe-->
-				{{getTotalCost() | currency}}<input class="hidden" type="text" readOnly="true" id="recipe_cost" name="recipe_cost" ng-value="getTotalCost()"\>
+				{{getTotalCost() | currency}}<input class="hidden" type="text" readOnly="true" id="recipe_cost" name="recipe_cost" ng-value="getTotalCost()"/>
 				</label>
 				<label class="recipe_label">
 				<strong>Cost per {{recipeCtrl.recipe.yeildUnit}}:</strong> 
 			<!--Cost of recipe-->
-				{{getTotalCost()/recipeCtrl.recipe.yeild | currency}}<input class="hidden" type="text" readOnly="true" id="recipe_individual_cost" name="recipe_individul_cost" ng-value="getTotalCost()/recipeCtrl.recipe.yeild | currency"\>
+				{{getTotalCost()/recipeCtrl.recipe.yeild | currency}}<input class="hidden" type="text" readOnly="true" id="recipe_individual_cost" name="recipe_individual_cost" ng-value="getTotalCost()/recipeCtrl.recipe.yeild | currency"/>
 				</label>
 				<br>
 				<br>
@@ -81,13 +81,13 @@
 				<!--quantity-->
 					<input type="text" id="quantity" name="quantity{{$index}}" ng-model="ingredient.quantity">			
 				<!--Unit dropdown-->
-					<select id="unit" name="unit{{$index}}" ng-model="ingredient.unitName">
+					<select id="unit" name="unit{{$index}}" ng-model="ingredient.unit" ng-change="changeRatio(ingredient.unit,$index)">
 						<option ng-repeat="unit in recipeCtrl.units">{{unit.Name}}</option>
 					</select>
 				<!--Cost calculated for each unit selected-->
-					$<input type="text" disabled=""  ng-value="ingredient.costPerKiloUnit * ingredient.Ratio">
+					{{ingredient.costPerKiloUnit * ingredient.Ratio | currency}}
 				<!--Total cost for quantity*cost of unit selected-->
-					Total $<input type="text" readOnly="true" id="total_cost{{$index}}" name="total_cost{{$index}}" ng-value="ingredient.costPerKiloUnit * ingredient.quantity">
+					Total {{ingredient.costPerKiloUnit * ingredient.quantity * ingredient.Ratio | currency}}
 				<!--Delete item-->
 					<button type="button" ng-click="removeItem()">Remove</button>
 				</section>

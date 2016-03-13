@@ -1,5 +1,5 @@
 <?php
-class Ingredient extends STOCK_DB{
+class Ingredient extends DBassoc{
 	
 	public static function getIngredientByName($recipeId, $name){
 		$db = self::getInstance();
@@ -25,7 +25,7 @@ class Ingredient extends STOCK_DB{
 		$db = self::getInstance();
 		$user = new User();	
 		$userId = $user->data()->id;
-		$sql = "SELECT `Products`.`productName`, `Products`.`id`, `Products`.`costPerKiloUnit`, `ProductRecipes`.`Recipes_id`, `ProductRecipes`.`quantity`, `ProductRecipes`.`unit`, `ProductRecipes`.`id`, `Unit`.`Ratio`
+		$sql = "SELECT `Products`.`productName`, `Products`.`id`, `Products`.`costPerKiloUnit`, `ProductRecipes`.`Recipes_id`, `ProductRecipes`.`quantity`, `ProductRecipes`.`unit`, `Unit`.`Ratio`, `Unit`.`UnitType`
 			FROM `Products`
 			JOIN `ProductRecipes`
 			ON `Products`.`id` = `ProductRecipes`.`Products_id`

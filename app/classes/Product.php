@@ -1,5 +1,5 @@
 <?php
-class Product extends STOCK_DB{
+class Product extends DBassoc{
 	
 	public static function exists($productId){
 		$db = self::getInstance();
@@ -19,7 +19,7 @@ class Product extends STOCK_DB{
 		$userId = $user->data()->id;
 		$name = "%{$name}%";
 		echo $name;
-		$sql = "SELECT `Products`.`id`, `Products`.`productName`, `Products`.`purchaseUnit`,`Products`.`purchaseUnitPrice`,`Products`.`purchaseUnitWeight`,`Products`.`yeild`,`Products`.`costPerKiloUnit`,`Products`.`density`, `Products`.`discount`,`Products`.`Suppliers_id`
+		$sql = "SELECT `Products`.`id`, `Products`.`productName`, `Products`.`purchaseUnit`,`Products`.`purchaseUnitPrice`,`Products`.`purchaseUnitWeight`,`Products`.`yeild`,`Products`.`costPerKiloUnit`,`Products`.`density`, `Products`.`discount`,`Products`.`Suppliers_id`, `Products`.`unitName`
 		FROM `Products`
 		WHERE `Products`.`productName` LIKE ?
 		AND `Products`.`user` = ?;"; 
@@ -33,12 +33,14 @@ class Product extends STOCK_DB{
 		$db = self::getInstance();
 		$user = new User();
 		$userId = $user->data()->id;
-		$sql = "SELECT `Products`.`id`, `Products`.`productName`, `Products`.`purchaseUnit`,`Products`.`purchaseUnitPrice`,`Products`.`purchaseUnitWeight`,`Products`.`yeild`,`Products`.`costPerKiloUnit`,`Products`.`density`, `Products`.`discount`,`Products`.`Suppliers_id`
+		$sql = "SELECT `Products`.`id`, `Products`.`productName`, `Products`.`purchaseUnit`,`Products`.`purchaseUnitPrice`,`Products`.`purchaseUnitWeight`,`Products`.`yeild`,`Products`.`costPerKiloUnit`,`Products`.`density`, `Products`.`discount`,`Products`.`Suppliers_id`, `Products`.`unitName`, `Unit`.`Ratio`, `Unit`.`UnitType`
 		FROM `Products`
-		WHERE `Products`.`user` = ?;";
+		JOIN `Unit`
+		ON `Products`.`unitName` = `Unit`.`Name`
+		AND `Products`.`user` = ?;";
 		if($products = $db->query($sql,[$userId])){
 			$products = $products->results();
-			return json_decode(json_encode($products),true);
+			return $products;
 		}
 		return false;
 	}

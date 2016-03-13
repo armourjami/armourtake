@@ -25,7 +25,6 @@
 			<th>Recipe Name</th>
 			<th>Purchase Unit</th>
 			<th>Price</th>
-			<th>Default unit</th>
 			<th>Cost per Unit</th>
 			<th>&nbsp;</th>
 			<th>&nbsp;</th>
@@ -34,14 +33,13 @@
 			<tr ng-repeat="product in productCtrl.products">
 				<td>{{product.productName}}</td>
 				<td>{{product.purchaseUnit}}</td>
-				<td>{{product.purchaseUnitPrice}}</td>
-				<td>{{product.unitName}}</td>
-				<td>{{product.costPerKiloUnit | currency}}</td>
+				<td>{{product.purchaseUnitPrice | currency}}</td>
+				<td>{{product.costPerKiloUnit | currency}}/{{product.unitName}}</td>
 				<td><a href="/armourtake/public/account/product/{{product.id}}">View</a></td>
 				<td><a href="/armourtake/public/account/edit_product/{{product.id}}">Edit/Delete</a></td>
 			</tr>
 			<tr>
-				<td colspan="7"><a href="" id="addNewProduct">Add new Product</a></td>
+				<td colspan="6"><a href="" id="addNewProduct">Add new Product</a></td>
 			</tr>
 		</tbody>
 	</table>

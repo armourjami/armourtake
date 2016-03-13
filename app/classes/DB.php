@@ -1,12 +1,12 @@
 <?php
 class DB {
 
-	private static $_instance = null;
-	private $_pdo,
-		$_query,
-		$_error = false,
-		$_results,
-		$_count = 0;
+	protected static $_instance = null;
+	protected 	$_pdo,
+		  	$_query,
+			$_error = false,
+			$_results,
+			$_count = 0;
 
 	public function __construct(){
 		try{
@@ -19,7 +19,7 @@ class DB {
 	}
 	
 	public static function getInstance(){
-		if(!isset(self::$_instance)){
+		if(!isset(self::$_instance) || get_class(self::$_instance) !== 'DB'){
 			self::$_instance = new DB();
 		}
 		return self::$_instance;

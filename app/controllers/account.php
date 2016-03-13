@@ -171,13 +171,10 @@ class account extends Controller{
 		if($user->isLoggedIn()){
 			if(isset($idRecipe)){
 				$this->_db = STOCK_DB::getInstance();						
-				
-				$recipes = new recipes();
-				$recipe = $recipes->findRecipe($idRecipe);
+				$recipe = Recipe::toArray($idRecipe);	
 
-				$units = $this->_db->get('Unit', ['Name', '<>', ''], $user->data()->id);
-				$units_json  = json_encode($units->results());
-
+				$units = Unit::toArray();
+				/*
 				$products = $this->_db->join(
 					array( 
 						 array( 
@@ -205,10 +202,12 @@ class account extends Controller{
 					)
 				, true);//select distinct
 			
-				//$products = $this->_db->getOneOfEach('ProductRecipes', [1]); 
+				$products = $this->_db->getOneOfEach('ProductRecipes', [1]); 
 				$products = $products->results();
-				$products_json = json_encode($products);
-
+				*/
+				$product = Product::toArray();
+				//$products_json = json_encode($products);
+				
 				
 				$this->view('account/recipe_edit', [
 					'register' => true, 
@@ -216,13 +215,15 @@ class account extends Controller{
 					'flash' => $flash_string, 
 					'name' => $user->data()->name, 
 					'page_name' => "Edit recipe",
-					'products' => $products_json,
+					'products' => json_encode($product),
  					'user_id' => $user->data()->id,
 					'recipe' => json_encode($recipe),
-					'units' => $units_json,
+					'units' => json_encode($units),
 				]);
 
 			}else{		
+				
+				Redirect::to('account/recipes');
 				$this->view('account/recipes', [
 					'register' => true, 
 					'loggedIn' => 1, 
@@ -246,112 +247,47 @@ class account extends Controller{
 		$user = new User();
 		if($user->isLoggedIn()){
 			if(Input::exists()){
-				$this->_db = STOCK_DB::getInstance();						
-				$recipe = $this->_db->get('Recipes', ['id', '=', Input::get('recipe_id')], $user->data()->id);
-				$recipe = $recipe->first();
-				
-				$pros_recs = new recipe(Input::get('recipe_id'));
-				$pro_rec = $pros_recs->data();	
-				$json  = json_encode($pro_rec);
-				$ingredients = json_decode($json, true);
-
-				//Check each field to see what needs to be update
-				$entry_changes = array();
-				//Verify non repeating information
-				$validate = new Validation();
-				$validation = $validate->check($_POST, array(
-					'recipe_name' => array(
-						'required' => true,
-						'label' => true
-					),
-					'recipe_yeild' => array(
-						'required' => true,
-						'min' => 0,
-						'max' => 1000
-					),
-					'recipe_cost' => array(
-						'required' => true,
-						'min' => 0,
-						'max' => 50000
-					),
-					'recipe_method' => array(
-						'required' => true
-					)
-				));
-
-				if($validation->passed()){
-				//Validate and check all Recipe table data
-					if(Input::get('recipe_name') !== $recipe->recipeName){
-						$entry_changes['recipeName'] = Input::get('recipe_name');
-					}
-					if(Input::get('recipe_yeild') !== $recipe->yeild){
-						$entry_changes['yeild'] = Input::get('recipe_yeild');
-					}
-					if(Input::get('recipe_unit') !== $recipe->yeildUnit){
-						$entry_changes['yeildUnit'] = Input::get('recipe_unit');
-					}
-					if(floatval(Input::get('recipe_cost')) !== floatval($recipe->recipeCost)){
-						$entry_changes['recipeCost'] = Input::get('recipe_cost');
-					}	
-					//$entry_changes['recipeCost'];
-					if(Input::get('recipe_method') !== $recipe->method){
-						$entry_changes['method'] = filter_var(trim(Input::get('recipe_method')),FILTER_SANITIZE_SPECIAL_CHARS);
-					}
-					//Update each feild
-					if(count($entry_changes)){
-						$pros_recs->update($entry_changes);
-					}
-				}
-				$error_string = "";
-				/*
-					-if the ingredient is new add it
-					-if the ingredient is gone, delete it
-					-is the ingredient already in the recipe, update it
-
-				*/
 				echo var_dump($_POST);
+				//First Validate the recipe data sent
 
-				//Add any new ingredients to the list here
-				
+				//Update recipe data
+				Recipe::updateFields(Input::get('recipe_id'), [
+					'yeild' => Input::get('recipe_yeild'),
+					'yeildUnit' => Input::get('recipe_unit'),
+					'method' => Input::get('recipe_method'),
+					'recipeName' => Input::get('recipe_name'),
+					'recipeCost' => Input::get('recipe_cost'),
+				]);					
+
+				//foreach ingredient
+				$currentIds = array_column(Recipe::getIngredients(Input::get('recipe_id')), 'id');
 				$i = 0;
-				foreach($ingredients as $value){
-
-					if(Input::get("id$i") != ""){
-						if(Input::get("quantity$i") != $value['quantity'] || Input::get("unit$i") != $value['unit']){
-							//Validate changes	
-							$validate = new Validation();
-							$validation = $validate->check($_POST, array(
-								"quantity$i" => array(
-									'required' => true,
-									'min' => 0,
-									'max' => 1000
-								),
-								"unit$i" => array(
-									'required' => true
-								)
-							));
-							//Update the changes
-							if($validation->passed()){
-								$changes = array(
-									"quantity" => Input::get("quantity$i"),
-									"unit" => Input::get("unit$i")
-								);			
-								
-								//Update the Ingredient	
-								$pros_recs->updateIngredient($value['Products_id'], $changes);
-							}
-						}
+				while(Input::get('id' . $i) !== ''){
+					$id = Input::get('id' . $i);
+					if(!in_array($id, $currentIds)){
+						//create it
+						Recipe::addIngredient(Input::get('recipe_id'), $id,Input::get('quantity'. $i), Input::get('unit' . $i));	
+						echo var_dump($currentIds);
 					}else{
-						continue;
+						//modify the Ingredient
+						Recipe::changeIngredientUnit(Input::get('recipe_id'), $id, Input::get('unit' . $i));
+						Recipe::changeIngredientQuantity(Input::get('recipe_id'), $id, Input::get('quantity' . $i));
+						//tick off $currentId from the list of $currentIds
+						$key = array_search($id, $currentIds);
+						echo 'removing from array id No.' . $currentIds[$key] . "\n";
+						unset($currentIds[$key]);
 					}
 					$i++;
 				}
+				//if there are any ingredients left in $currentIds then they have been deleted
+				echo var_dump($currentIds);
+				if(count($currentIds)){
+					foreach($currentIds as $id){
+						echo $id . " being deleted\n";
+						Recipe::deleteIngredient(Input::get('recipe_id'), $id);
+					}
+				}
 				
-				$pros_recs->update(['recipeCost' => Input::get('recipe_cost')]);
-
-				foreach($validation->errors() as $error){
-					$error_string .= $error . "\n";
-				}		
 				Session::flash('account', $error_string); 
 
 				//redirect here
