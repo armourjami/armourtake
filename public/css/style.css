@@ -52,7 +52,7 @@ td a {
 
 #modalContent {
     position: relative;
-    width:300px;
+    width:500px;
     margin: 15px auto;
     padding:15px;
     background-color: #fff;
@@ -62,7 +62,7 @@ td a {
 
 .edit-form {
 	position: relative;
-	width: 300px;
+	width: 500px;
 }
 
 label {
@@ -74,7 +74,7 @@ label span {
 	float: left;
 	display: block;
 	text-align: right;
-	width: 110px;
+	width: 210px;
 	padding: 0 10px;
 }
 

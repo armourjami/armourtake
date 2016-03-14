@@ -30,7 +30,7 @@
 				<td>{{dish.salePrice/1.15 - dish.costPrice/dish.yeild | currency}}</td>
 				<td>{{1 - (dish.costPrice/dish.yeild)/(dish.salePrice/1.15) | percentage:2}}</td>
 				<td><a href="/armourtake/public/account/dish/{{dish.id}}">View</a></td>
-				<td><a href="/armourtake/public/account/delete_dish/{{dish.Name}}">Edit/Delete</a></td>
+				<td><a href="/armourtake/public/account/dish_edit/{{dish.Name}}">Edit/Delete</a></td>
 			</tr>
 			<tr>
 				<td colspan="7"><a href="" id="addNewDish">Add new Dish</a></td>

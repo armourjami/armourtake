@@ -23,6 +23,10 @@
 			Gross Revenue: {{dishCtrl.dish.salePrice/1.15 - dishCtrl.dish.costPrice | currency}}
 			Margin: {{(dishCtrl.dish.salePrice/1.15 - dishCtrl.dish.costPrice) / dishCtrl.dish.salePrice | percentage:2}}
 		</p>
+		<!--List the recipes/products-->
+		<div ng-repeat="ingredient in dishCtrl.dish.ingredients">		
+			<p>{{ingredient.quantity}} {{ingredient.unit}} <strong>{{ingredient.recipeName}}</strong> {{(ingredient.recipeCost/ingredient.yeild) | currency}}</p>
+		</div>
 	</div>	
 <?php
 	

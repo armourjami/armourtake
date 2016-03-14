@@ -36,7 +36,7 @@
 		<span class="recipe_heading">Method:</span>
 		</p>
 		<p class="recipe_method">
-			{{recipeCtrl.recipe.method}}
+			<textarea class="method" rows="10" cols="100" disabled="true">{{recipeCtrl.recipe.method | decodeHtml}}</textarea>
 		</p>
 		<p>
 		<a href="/armourtake/public/account/recipes">Back to Recipes</a>

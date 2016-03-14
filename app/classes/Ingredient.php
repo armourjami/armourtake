@@ -32,7 +32,8 @@ class Ingredient extends DBassoc{
 			AND `ProductRecipes`.`Recipes_id` = ?
 			AND `Products`.`user` = ?
 			JOIN `Unit`
-			ON `ProductRecipes`.`unit` = `Unit`.`Name`;";						
+			ON `ProductRecipes`.`unit` = `Unit`.`Name`
+			ORDER BY `ProductRecipes`.`id` ASC;";						
 		if($ingredient = $db->query($sql, [$recipeId, $userId])->results()){
 			return $ingredient;
 		}else{

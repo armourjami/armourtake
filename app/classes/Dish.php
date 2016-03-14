@@ -4,7 +4,7 @@
 //
 //####################################################################################################################
 
-class Dish extends STOCK_DB{
+class Dish extends DBassoc{
 	//half done
 	public static function toArray($dishId = null){
 		$db = self::getInstance();
@@ -26,7 +26,7 @@ class Dish extends STOCK_DB{
 			}
 		}else{
 			if($dishes = $db->query($sql, [$userId])){
-				return json_decode(json_encode($dishes->results()), true);
+				return $dishes->results();
 			}else{
 				return false;
 			}

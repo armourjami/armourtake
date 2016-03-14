@@ -8,6 +8,14 @@
 	    		return $filter('number')(input * 100, decimals) + '%';
 	  	};
 	}]);
+
+	app.filter('decodeHtml', ['$filter', function ($filter) {
+		var txt = document.createElement("textarea");
+	  	return function (input) {
+	    		txt.innerHTML = input;
+			return txt.value;
+	  	};
+	}]);
 	
 	app.filter('decimals', ['$filter', function ($filter) {
 	  	return function (input, decimals) {
@@ -110,7 +118,23 @@
 	//For list of Products, aka Products index
 	app.controller("productTableController", function($scope){
 		this.products = products;			
-		this.new;
+		this.units = units;
+		this.suppliers = suppliers;
+		this.newProduct = {
+			productName: '',
+			purchaseUnit: 'Kilo',
+			purchaseUnitWeight: 1,
+			unitName: 'Kilo',
+			purchaseUnitPrice: 1,
+			discount: 0,
+			yeild: 100,
+			density: 1,
+			Suppliers_id: 1
+		};
+		
+		$scope.displayNewItem = function(){
+			console.log($scope.productCtrl.newProduct);
+		};
 		
 		$scope.addNewIngredient = function(){
 			alert(recipeEditController.recipe.recipeName);

@@ -91,7 +91,7 @@ console.log(recipe.ingredients[2]);
 				<!--Delete item-->
 					<button type="button" ng-click="removeItem()">Remove</button>
 				</section>
-				<button type="button" id="add-new-ingredient-to-recipe">Add new ingredient</button>		
+				<button type="button" id="open-modal">Add new ingredient</button>		
 				<br>
 				<br>
 			<!--Method-->
@@ -115,10 +115,4 @@ console.log(recipe.ingredients[2]);
 			<a href="<?php echo dirname($_SERVER['PHP_SELF']) . '/account/recipes'; ?>">Back to Recipes</a>
 		</p>
 	</div>	
-	<script type="text/javascript">
-		//Set up the modal buttons
-	//		var pageInit = function() {
-    	////				Modal.switch_on_edit_buttons('add-new-ingredient-to-recipe');
-	//	};
-	//pageInit();
-	</script>
+	

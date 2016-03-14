@@ -32,10 +32,14 @@ class account extends Controller{
 		if($user->isLoggedIn()){
 
 			//load database content
+			$units = Unit::toArray();
 			$products = Product::toArray();
+			$suppliers = Supplier::toArray();
 
 			$this->view('account/products', [
 				'products' => json_encode($products),
+				'units' => json_encode($units),
+				'suppliers' => json_encode($suppliers),
 				'register' => true, 
 				'loggedIn' => 1, 
 				'flash' => $flash_string, 
@@ -84,7 +88,7 @@ class account extends Controller{
 
 			//load database content
 			$recipes = Recipe::toArray();
-			
+
 			$this->view('account/recipes', [
 				'recipes' => json_encode($recipes),
 				'register' => true, 
@@ -170,44 +174,11 @@ class account extends Controller{
 		$user = new User();
 		if($user->isLoggedIn()){
 			if(isset($idRecipe)){
-				$this->_db = STOCK_DB::getInstance();						
 				$recipe = Recipe::toArray($idRecipe);	
 
 				$units = Unit::toArray();
-				/*
-				$products = $this->_db->join(
-					array( 
-						 array( 
-							'table_name' => 'Products',
-							'next_table_name' => 'Unit',
-							'table_column' => 'unitName',
-							'next_table_column' => 'Name',
-							'selections' => array(
-								'id',
-								'productName',
-								'yeild',
-								'costPerKiloUnit',
-								'unitName',
-							)					 
-						 ),      
-						 array( 
-							'table_name' => 'Unit', 
-							'next_table_name' => null,
-							'table_column' => null,
-							'next_table_column' => null,
-							'selections' => array(
-								'Ratio',
-							)
-						 )      
-					)
-				, true);//select distinct
-			
-				$products = $this->_db->getOneOfEach('ProductRecipes', [1]); 
-				$products = $products->results();
-				*/
-				$product = Product::toArray();
-				//$products_json = json_encode($products);
 				
+				$product = Product::toArray();
 				
 				$this->view('account/recipe_edit', [
 					'register' => true, 
@@ -224,14 +195,6 @@ class account extends Controller{
 			}else{		
 				
 				Redirect::to('account/recipes');
-				$this->view('account/recipes', [
-					'register' => true, 
-					'loggedIn' => 1, 
-					'flash' => $flash_string, 
-					'name' => $user->data()->name, 
-					'page_name' => "",
-					'user_id' => $user->data()->id
-				]);
 			}
 		}else{
 			Session::flash('home', 'You have been logged out, please log back in');
@@ -247,14 +210,13 @@ class account extends Controller{
 		$user = new User();
 		if($user->isLoggedIn()){
 			if(Input::exists()){
-				echo var_dump($_POST);
 				//First Validate the recipe data sent
 
 				//Update recipe data
 				Recipe::updateFields(Input::get('recipe_id'), [
 					'yeild' => Input::get('recipe_yeild'),
 					'yeildUnit' => Input::get('recipe_unit'),
-					'method' => Input::get('recipe_method'),
+					'method' => filter_var(Input::get('recipe_method'), FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_HIGH),	
 					'recipeName' => Input::get('recipe_name'),
 					'recipeCost' => Input::get('recipe_cost'),
 				]);					
@@ -318,7 +280,6 @@ class account extends Controller{
 			if(isset($idDish)){
 				
 				$dish = Dish::toArray($idDish);
-					
 				$this->view('account/dish_view', [
 					'register' => true, 
 					'loggedIn' => 1, 
@@ -342,6 +303,42 @@ class account extends Controller{
 			Session::flash('home', 'You have been logged out, please log back in');
 			Redirect::to('home');
 		}
+	}
+
+	public function edit_dish($idDish= null){
+		$flash_string = '';
+		if(Session::exists('account')){
+			$flash_string = Session::flash('account');	
+		}
+		$user = new User();
+		if($user->isLoggedIn()){
+			if(isset($idDish)){
+				$dish = Dish::toArray($idRecipe);	
+
+				$units = Unit::toArray();
+				
+				$product = Product::toArray();
+				
+				$this->view('account/dish_edit', [
+					'register' => true, 
+					'loggedIn' => 1, 
+					'flash' => $flash_string, 
+					'name' => $user->data()->name, 
+					'page_name' => "Edit dish",
+					'products' => json_encode($product),
+ 					'user_id' => $user->data()->id,
+					'dish' => json_encode($dish),
+					'units' => json_encode($units),
+				]);
+
+			}else{		
+				
+				Redirect::to('account/dishes');
+			}
+		}else{
+			Session::flash('home', 'You have been logged out, please log back in');
+			Redirect::to('home');
+		}	
 	}
 	
 	public function dishes(){

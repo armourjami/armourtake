@@ -6,5 +6,5 @@ var decodeHtml = function(html) {
 
 //Set up the modal buttons
 var pageInit = function() {
-	Modal.switch_on_edit_buttons('add-new-ingredient-to-recipe');
+	Modal.switch_on_edit_buttons('open-modal');
 };
