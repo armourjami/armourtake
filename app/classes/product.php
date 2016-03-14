@@ -1,76 +1,58 @@
 <?php
-class product {
-	private	$_db,
-		$_user,
-		$_data;
-
-	public function __construct($id = null, $user = null){
-		$this->_db = STOCK_DB::getInstance();
-		if(!$this->_user){
-			$this->_user = new User();
+class Product extends STOCK_DB{
+	
+	public static function exists($productId){
+		$db = self::getInstance();
+		$user = new User();
+		$userId = $user->data()->id;
+		$sql = "SELECT * FROM `Products` WHERE `Products`.`user` = ? AND `Products`.`id` = ?;";
+		if($db->query($sql,[$userId, $productId])->count()){
+			return true;
+		}else{
+			return false;
 		}
-		if(isset($id)){
-			$this->find($id);
-			return $this;
-		}
-	}	
+	}
 
-	public function find($id){
-		if(isset($id)){
-			$data = $this->_db->get('Products', ['id', '=', $id], $this->_user->data()->id);
-			if(count($data)){
-				$this->_data = $data->first();
-				return true;
-			}
+	public static function searchProductsByString($string){
+		$db = self::getInstance();
+		$user = new User();
+		$userId = $user->data()->id;
+		$name = "%{$name}%";
+		echo $name;
+		$sql = "SELECT `Products`.`id`, `Products`.`productName`, `Products`.`purchaseUnit`,`Products`.`purchaseUnitPrice`,`Products`.`purchaseUnitWeight`,`Products`.`yeild`,`Products`.`costPerKiloUnit`,`Products`.`density`, `Products`.`discount`,`Products`.`Suppliers_id`
+		FROM `Products`
+		WHERE `Products`.`productName` LIKE ?
+		AND `Products`.`user` = ?;"; 
+		if($products = $db->query($sql,[$string, $userId])){
+			return $products->results();
 		}
 		return false;
 	}
 	
-	public function findNext($product_id = null){
-		//select all using the user id
-		$data = $this->_db->get('Products', ['id', '>=', 1], $this->_user->data()->id);
-		if(count($data)){
-			if(!$product_id){
-				//select the first entry	
-				$this->_data = $data->first();	
-				return true;
-			}else{
-				//Select the next after $product_id
-				for($i = 0; $i < count($data->results()); $i++){
-					if($data->results()[$i]->id == $product_id){
-						$this->_data = $data->results()[$i + 1];
-						return true;
-					}
-				}
-			}	
-		}else{
-			return false;
+	public static function toArray(){
+		$db = self::getInstance();
+		$user = new User();
+		$userId = $user->data()->id;
+		$sql = "SELECT `Products`.`id`, `Products`.`productName`, `Products`.`purchaseUnit`,`Products`.`purchaseUnitPrice`,`Products`.`purchaseUnitWeight`,`Products`.`yeild`,`Products`.`costPerKiloUnit`,`Products`.`density`, `Products`.`discount`,`Products`.`Suppliers_id`
+		FROM `Products`
+		WHERE `Products`.`user` = ?;";
+		if($products = $db->query($sql,[$userId])){
+			$products = $products->results();
+			return json_decode(json_encode($products),true);
 		}
-	}
-	
-
-	public function update($fields = array(), $id){
-		if($this->_db->update($fields, $id, $this->_user->data()->id)){
-			throw new Exception('Could not update Product');
-		}else{
-			$this->find($id, $user);
-		}
+		return false;
 	}
 
-	public function create($fields){
-		if(count($fields) == 10){
-			$fields['id'] = null;
-			if(!$this->_db->insert('Products', $fields, $this->_user->data()->id)){
-				throw new Exception('Could not create new Product');
-			}else{
-				return true;
-			}
-		}else{
+	public static function deleteById($productId){
+		$db = self::getInstance();
+		$user = new User();
+		$userId = $user->data()->id;
+		$sql = "DELETE FROM `Products` WHERE `Products`.`user` = ? AND `Products`.`id` = ?;";
+		if(!$db->query($sql, [$userId, $productId])){
 			return false;
 		}
+		return true;
 	}
-	
-	public function data(){
-		return $this->_data;
-	}
- }
+
+		
+}
